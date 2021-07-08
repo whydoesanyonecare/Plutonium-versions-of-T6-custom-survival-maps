@@ -183,7 +183,6 @@ onPlayerSpawned()
 	self takeweapon( "m1911_zm" );
 	self giveweapon( "kard_zm" );
 	self switchtoweapon( "kard_zm" );
-    self.score = 500000;
 	flag_wait( "start_zombie_round_logic" );
 	wait 4;
 	self iprintln( "Nacht - Survival" );
