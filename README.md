@@ -3,7 +3,7 @@
 Installion Guide for Compiled file: https://forum.plutonium.pw/topic/6966/how-to-use-a-mod-menu-without-injecting-loading-gsc-scripts-client-sided
 
 
-GSC Toolkit zip has compiler. To compile file you have to drag and drop the uncompiled file on the gsc compiler.exe and wait till its done. 
+GSC Toolkit zip has compiler. To compile file you have to drag and drop the uncompiled file on the compiler.exe and wait till its done. 
 
 GSC Toolkit = https://drive.google.com/open?id=1YcsRkpWPcP52Yg9rF_HThGofitgyJYDZ
 
