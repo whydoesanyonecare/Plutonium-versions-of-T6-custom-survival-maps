@@ -62,9 +62,122 @@ Shootable EasterEgg:
 
     Find And shoot 10 Teddy bears
 
-REPORT ANY BUGS YOU FIND
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Huge Thanks to 2 Millimeter Nahkampfwächter who Helped with this Project.
+Map - Forest - TranZit
+
+This map uses TranZit
+
+Custom Power ups:
+```
+    Death Machine
+    Unlimited Ammo
+    Zombie Cash
+    Random Perk
+   ``` 
+Custom rounds:
+
+```
+    custom electric screecher rounds
+
+```
+Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
+
+Custom Perks:
+
+```
+    Ammo regen
+    Deadshot
+    Dying wish
+    Widow's Wine
+    Ethereal Razor
+    PhD Flopper
+    Mule kick
+    Electric Cherry
+    Downer's Delight
+```
+
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Map - Nacht - TranZit
+
+This map uses TranZit
+
+Custom Power ups:
+   ```
+    Death Machine
+    Unlimited Ammo
+    Zombie Cash
+    Random Perk
+   ``` 
+
+Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
+
+Custom Perks:
+
+```
+    Ammo regen
+    Deadshot
+    Dying wish
+    Widow's Wine
+    Ethereal Razor
+    PhD Flopper
+    Mule kick
+    Electric Cherry
+    Downer's Delight
+```
+
+Boss Zombie:
+
+```
+boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
+```
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Map - Town with Dogs - Town Survival
+
+This map uses Town Survival
+
+Custom Power ups:
+   ```
+    Death Machine
+    Fire Sale
+    Unlimited Ammo
+    Zombie Cash
+    Random Perk
+   ``` 
+
+Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
+
+Custom Perks:
+
+```
+    Ammo regen
+    Burn Heart
+    Deadshot
+    Dying wish
+    Widow's Wine
+    Ethereal Razor
+    PhD Flopper
+    Mule kick
+    Electric Cherry
+    Downer's Delight
+    Victorious Tortoise
+```
+
+Boss Zombie:
+
+```
+boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
+```
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+REPORT ANY BUGS YOU FIND
+
+Huge Thanks to 2 Millimeter Nahkampfwächter who Helped with these Projects.
