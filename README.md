@@ -168,6 +168,10 @@ Custom Perks:
     Victorious Tortoise
 ```
 
+Shootable eaaster egg: (Way too easy gonna update later)
+```
+reward: perkaholic
+```
 Boss Zombie:
 
 ```
