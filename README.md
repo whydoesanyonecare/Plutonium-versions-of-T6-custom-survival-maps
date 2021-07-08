@@ -1,9 +1,9 @@
-# Plutonium versions of custom maps
+# Plutonium versions of survival custom maps
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Custom Survival - Diner - TranZit
+Map - Diner - TranZit
 
 This map uses TranZit
 
