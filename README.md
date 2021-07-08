@@ -2,7 +2,7 @@
 
 Installion Guide for Compiled file: https://forum.plutonium.pw/topic/6966/how-to-use-a-mod-menu-without-injecting-loading-gsc-scripts-client-sided
 
-
+Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +44,6 @@ Controller aim assist:
 
     Enable / Disable controller aim assist LB and RB
 
-Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
 
 7 Custom Perks:
 
@@ -64,7 +63,7 @@ Shootable EasterEgg:
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-MAP FOREST
+MAP FOREST:
 
 This map uses TranZit
 
@@ -81,9 +80,8 @@ Custom rounds:
     custom electric screecher rounds
 
 ```
-Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
 
-Custom Perks:
+Custom Perks: ( can only been bought from random perk machine )
 
 ```
     Ammo regen
@@ -113,9 +111,8 @@ Custom Power ups:
     Random Perk
    ``` 
 
-Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
 
-Custom Perks:
+Custom Perks: ( can only been bought from random perk machine )
 
 ```
     Ammo regen
@@ -150,7 +147,6 @@ Custom Power ups:
     Random Perk
    ``` 
 
-Custom perk icons are only in correct spot while using 1080p or 720p. in other resolutions perk icons are messed up atm
 
 Custom Perks:
 
