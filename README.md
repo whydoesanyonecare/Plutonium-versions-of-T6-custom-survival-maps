@@ -9,6 +9,7 @@ This map uses TranZit
 
 UPDATE: 08.07.2021 
 
+```
 Added:
 
 -custom startup weapon
@@ -21,6 +22,7 @@ Added:
 
 *2 Millimeter Nahkampfwächter Upgraded perk system.*
 
+```
 
 Installion Guide for Compiled file: https://forum.plutonium.pw/topic/6966/how-to-use-a-mod-menu-without-injecting-loading-gsc-scripts-client-sided
 
