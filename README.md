@@ -1,5 +1,8 @@
 # Plutonium versions of survival custom maps
 
+Installion Guide for Compiled file: https://forum.plutonium.pw/topic/6966/how-to-use-a-mod-menu-without-injecting-loading-gsc-scripts-client-sided
+
+
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -24,7 +27,6 @@ Added:
 
 ```
 
-Installion Guide for Compiled file: https://forum.plutonium.pw/topic/6966/how-to-use-a-mod-menu-without-injecting-loading-gsc-scripts-client-sided
 
 Custom Power ups:
 
