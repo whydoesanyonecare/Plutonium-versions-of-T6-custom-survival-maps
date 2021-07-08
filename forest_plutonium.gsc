@@ -216,7 +216,6 @@ onPlayerSpawned()
 	flag_wait( "start_zombie_round_logic" );
 	wait 3;
 	self iprintln( "forest - Survival" );
-	self.score = 100000;
 	self thread boss_round_monitor();
 	for(;;)
 	{
