@@ -20,13 +20,13 @@ UPDATE: 08.07.2021
 ```
 Added:
 
--custom startup weapon
+- custom startup weapon
 
--Pack a Punch weapon custom Power up
+- Pack a Punch weapon custom Power up
 
--Zombie blood Power up
+- Zombie blood Power up
 
--3 Soul boxes which give random perk when done
+- 3 Soul boxes which give random perk when done
 
 *2 Millimeter Nahkampfwächter Upgraded perk system.*
 
@@ -35,156 +35,156 @@ Added:
 
 Custom Power ups:
 
-    Death Machine
-    Unlimited Ammo
-    Pap Weapon
-    Zombie Cash
-    Zombie Blood
+  - Death Machine
+  - Unlimited Ammo
+  - Pap Weapon
+  - Zombie Cash
+  - Zombie Blood
 
 Custom rounds:
 
-    custom electric screecher rounds
+  - custom electric screecher rounds
 
 Controller aim assist:
 
-    Enable / Disable controller aim assist LB and RB
+  - Enable / Disable controller aim assist LB and RB
 
 
 7 Custom Perks:
 
-    Widow's Wine
-    Ethereal Razor
-    PhD Flopper
-    Mule kick
-    Electric Cherry
-    Downer's Delight
-    Victorious Tortoise
+  - Widow's Wine
+  - Ethereal Razor
+  - PhD Flopper
+  - Mule kick
+  - Electric Cherry
+  - Downer's Delight
+  - Victorious Tortoise
 
 tombstone give back custom perks on pickup
 
 Shootable EasterEgg:
 
-    Find And shoot 10 Teddy bears
+ - Find And shoot 10 Teddy bears
+
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 MAP FOREST:
 
 This map uses TranZit
 
 Custom Power ups:
-```
-    Death Machine
-    Unlimited Ammo
-    Zombie Cash
-    Random Perk
-   ``` 
+
+  - Death Machine
+  - Unlimited Ammo
+  - Zombie Cash
+  - Random Perk
+   
 Custom rounds:
 
-```
-    custom electric screecher rounds
 
-```
+  - custom electric screecher rounds
+
 
 Custom Perks: ( can only been bought from random perk machine )
 
-```
-    Ammo regen
-    Deadshot
-    Dying wish
-    Widow's Wine
-    Ethereal Razor
-    PhD Flopper
-    Mule kick
-    Electric Cherry
-    Downer's Delight
-```
+  - Ammo regen
+  - Deadshot
+  - Dying wish
+  - Widow's Wine
+  - Ethereal Razor
+  - PhD Flopper
+  - Mule kick
+  - Electric Cherry
+  - Downer's Delight
 
 Boss Zombie:
 
-```
-boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
-```
+  - boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
+  
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 MAP NACHT:
 
 This map uses TranZit
 
 Custom Power ups:
-   ```
-    Death Machine
-    Unlimited Ammo
-    Zombie Cash
-    Random Perk
-   ``` 
+   
+   - Death Machine
+   - Unlimited Ammo
+   - Zombie Cash
+   - Random Perk 
 
 
 Custom Perks: ( can only been bought from random perk machine )
 
-```
-    Ammo regen
-    Deadshot
-    Dying wish
-    Widow's Wine
-    Ethereal Razor
-    PhD Flopper
-    Mule kick
-    Electric Cherry
-    Downer's Delight
-```
+  - Ammo regen
+  - Deadshot
+  - Dying wish
+  - Widow's Wine
+  - Ethereal Razor
+  - PhD Flopper
+  - Mule kick
+  - Electric Cherry
+  - Downer's Delight
 
 Boss Zombie:
 
-```
-boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
-```
+
+  - boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
+
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 MAP TOWN WITH DOGS
 
 This map uses Town Survival
 
 Custom Power ups:
-   ```
-    Death Machine
-    Fire Sale
-    Unlimited Ammo
-    Zombie Cash
-    Random Perk
-   ``` 
-
+  
+  - Death Machine
+  - Fire Sale
+  - Unlimited Ammo
+  - Zombie Cash
+  - Random Perk 
 
 Custom Perks:
 
-```
-    Ammo regen
-    Burn Heart
-    Deadshot
-    Dying wish
-    Widow's Wine
-    Ethereal Razor
-    PhD Flopper
-    Mule kick
-    Electric Cherry
-    Downer's Delight
-    Victorious Tortoise
-```
+
+  - Ammo regen
+  - Burn Heart
+  - Deadshot
+  - Dying wish
+  - Widow's Wine
+  - Ethereal Razor
+  - PhD Flopper
+  - Mule kick
+  - Electric Cherry
+  - Downer's Delight
+  - Victorious Tortoise
+  
 
 Shootable eaaster egg: (Way too easy gonna update later)
-```
-reward: perkaholic
-```
+
+  - find and shoot 6 teddybears
+  - reward: perkaholic
+
 Boss Zombie:
 
-```
-boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
-```
+  - boss zombie spawn randomly around every 5th round it has 20k health and drops powerups on death
+
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 REPORT ANY BUGS YOU FIND
