@@ -356,7 +356,6 @@ SpawnPoint()
 	{
 		player[ 3] setorigin( (13692.2,-685.697,-188.875 ) );
 	}
-
 }
 
 init_custom_map()
@@ -867,7 +866,7 @@ soul_box(model)
 	level.soulbox_active = 1;
 	level.soulbox1_active = 1;
 	level.soulbox2_active = 1;
-	level.souls_needed = 30;
+	level.souls_needed = 40;
 	level.soulbox_souls = 0;
 	level.soulbox1_souls = 0;
 	level.soulbox2_souls = 0;
@@ -1562,7 +1561,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud_icon.hidewheninmenu = true;   
 		power_up_hud_icon setshader( shader, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud_icon);
-		self thread destroy_power_up_icon_hud(power_up_hud_icon, 0);
+		self thread destroy_power_up_icon_hud(power_up_hud_icon);
 	}
 	if(shader2)
 	{
@@ -1575,7 +1574,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud2_icon.hidewheninmenu = true;   
 		power_up_hud2_icon setshader( shader2, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud2_icon);
-		self thread destroy_power_up_icon_hud(0, power_up_hud2_icon);
+		self thread destroy_power_up_icon_hud2(power_up_hud2_icon);
 	}
 }
 
@@ -1617,19 +1616,18 @@ power_up_hud_icon_blink(elem)
 	}
 }
 
-destroy_power_up_icon_hud(elem, elem2)
+destroy_power_up_icon_hud(elem)
 {
 	level endon("game_ended");
-	if (s_powerup.powerup_name == "unlimited_ammo")
-	{
-		self waittill_any_timeout( "disconnect", "end_unlimited_ammo");
-		elem destroy();
-	}
-	if (s_powerup.powerup_name == "death_machine")
-	{
-		self waittill_any_timeout( "disconnect", "Death_Machine_Stop");
-		elem2 destroy();
-	}
+	self waittill_any_timeout( "disconnect", "end_unlimited_ammo");
+	elem destroy();
+}
+
+destroy_power_up_icon_hud2(elem2)
+{
+    level endon("game_ended");
+	self waittill_any_timeout( "disconnect", "Death_Machine_Stop");
+	elem2 destroy();
 }
 
 endammo()
