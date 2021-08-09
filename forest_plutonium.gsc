@@ -136,7 +136,6 @@ init()
 		level thread drawZombiesCounter();
 		level thread onPlayerConnect();
 		level thread custom_round_monitor();
-		level thread teleport_zombies();
         //level thread night_mode(); ENABLE NIGHT MODE || Dying Wish Red Effect not working while enabled
 		level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
