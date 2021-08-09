@@ -64,7 +64,6 @@
 #include maps/mp/zm_transit;
 init()
 {
-
 	if( getdvar( "mapname" ) == "zm_transit" && getdvar ( "g_gametype")  == "zclassic" )
 	{
 		include_zombie_powerup("death_machine");
@@ -81,7 +80,7 @@ init()
 
 		include_zombie_powerup("random_perk");
    	    add_zombie_powerup("random_perk", "t6_wpn_zmb_perk_bottle_sleight_world", &"ZOMBIE_POWERUP_RANDOM_PERK", ::func_should_always_drop, 0, 0, 0); 
-	    powerup_set_can_pick_up_in_last_stand("random_perk", 1);
+	    powerup_set_can_pick_up_in_last_stand("random_perk", 0);
 
 		precachemodel( "p_cub_door01_wood_fullsize" );
 		precachemodel( "p_rus_door_white_window_plain_left" );
@@ -132,14 +131,16 @@ init()
 		level.effect_WebFX = loadfx("misc/fx_zombie_powerup_solo_grab");
 		level.player_out_of_playable_area_monitor = 0;
 		level.perk_purchase_limit = 20;
+		level thread move_spawn_locations();
 		level thread stopbus(); 
 		level thread drawZombiesCounter();
 		level thread onPlayerConnect();
 		level thread custom_round_monitor();
 		level thread teleport_zombies();
-        level thread night_mode();
+        //level thread night_mode(); ENABLE NIGHT MODE || Dying Wish Red Effect not working while enabled
 		level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
+
 	}
 	else
 	{
@@ -150,6 +151,18 @@ init()
 		setdvar( "ui_errorMessage", "^9Please use Green Run - Tranzit Normal Mode");
 	    setdvar( "ui_errorTitle", "^1Error" );
 	}
+}
+
+move_spawn_locations()
+{
+	flag_wait( "initial_blackscreen_passed" );
+	level.zombie_spawn_locations[2].origin = (3848, 5520, -63);
+	level.zombie_spawn_locations[14].origin = (4667, 6280, -72);
+	level.zombie_spawn_locations[15].origin = (3708, 6098, -63);
+	level.zombie_spawn_locations[16].origin = (4766, 5421, -86);
+	level.zombie_spawn_locations[17].origin = (3848, 5520, -63);
+	level.zombie_spawn_locations[18].origin = (4766, 5421, -86);
+	level.zombie_spawn_locations[19].origin = (3848, 5520, -63);
 }
 
 night_mode()
@@ -228,35 +241,6 @@ onPlayerSpawned()
 		{
 			self.score = 2500;
 		}
-	}
-}
-
-teleport_zombies()
-{
-	self endon("disconnect");
-	speed = [];
-	speed[0] = "run";
-	speed[1] = "sprint";
-	for(;;)
-	{	
-		foreach(zombie in getAiArray(level.zombie_team))
-		{
-			if(distance( zombie.origin, (5079.05, 7156.78, -56.875) ) < 100)
-			{
-				zombie forceteleport(( 3708, 6098, -63.44 ));
-				zombie thread find_flesh();
-				zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( "sprint" );
-			}
-			if( level.round_number < 5 )
-			{
-				if( !(IsDefined( zombie.run_set )) )
-				{	
-					zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] ); 
-					zombie.run_set = 1;
-				}
-			}
-		}
-		wait 0.3;
 	}
 }
 
@@ -378,18 +362,14 @@ SpawnPoint()
 
 init_custom_map()
 {	
-	noncollision( "script_model", ( 5118.05, 7088.78, -24.875 ), "p_cub_door01_wood_fullsize", ( 0, 0, 0 ), "wood_door" ); 
+	noncollision( "script_model", ( 5116.05, 7088.78, -24.875 ), "p_cub_door01_wood_fullsize", ( 0, 0, 0 ), "wood_door" ); 
 	noncollision( "script_model", ( 5456.65, 6313.14, -65.3518 ), "collision_player_wall_512x512x10", ( 0, 110, 0 ), "collisionwall1" );
 	noncollision( "script_model", ( 5333.69, 4503.56, -70.0705 ), "collision_player_wall_512x512x10", ( 0, 90, 0 ), "collisionwall2" );
 	noncollision( "script_model", ( 3735.79, 4160.7, -122.9 ), "collision_player_wall_512x512x10", ( 0, -45, 0 ), "collisionwall3" );
 	noncollision( "script_model", ( 5400.65, 6513.14, -65.3518 ), "t5_foliage_tree_burnt03", ( -80, 110, 0 ), "tree" );
-	//noncollision( "script_model", ( 5415.69, 4395.56, -70.0705 ), "veh_t6_civ_bus_zombie", ( 0, 90, 0 ), "bus" );
+	noncollision( "script_model", ( 5415.69, 4395.56, -70.0705 ), "veh_t6_civ_bus_zombie", ( 0, 90, 0 ), "bus" );
 	noncollision( "script_model", ( 3715.79, 4130.7, -122.9 ), "t5_foliage_tree_burnt03", ( -80, -45, 0 ), "tree2" );
 	noncollision( "script_model", ( 3800.79, 4040.7, -122.9 ), "veh_t6_civ_microbus_dead", ( 0, -45, 0 ), "minibus" );
-	wallweapons( "riotshield_zm", ( 5161.69, 7039, 0.875 ), ( 0, 45, 0 ), 1000 ); 
-	wallweapons( "cymbal_monkey_zm", ( 5390.69, 6946, 21.351 ), ( 0, 135, 0 ), 4000 );
-	soul_box( "zombie_perk_bottle_tombstone" );
-	door();
 	perk_system( "script_model", ( 5086.28, 7071, -24.875 ), "zombie_vending_revive_on", ( 0, 0, 0 ), "revive" );
 	perk_system( "script_model", ( 4244.28, 6091, -63.875 ), "zombie_vending_jugg_on", ( 0, 45, 0 ), "original", "mus_perks_jugganog_sting", "Jugger-Nog", 2500, "jugger_light", "specialty_armorvest" );
 	perk_system( "script_model", ( 3837, 4090, -122.52 ), "zombie_vending_marathon_on", ( 0, 135, 0 ), "original", "mus_perks_stamin_sting", "Stamin-Up", 2000, "marathon_light", "specialty_longersprint" );
@@ -397,6 +377,10 @@ init_custom_map()
 	perk_system( "script_model", ( 3252.1, 5349.29, -63.8062 ), "zombie_vending_doubletap2_on", ( 0, 90, 0 ), "original", "mus_perks_doubletap_sting", "Double Tap Root Beer", 2000, "doubletap_light", "specialty_rof" );
 	perk_system( "script_model", ( 5340.8, 7060, -25.2195 ), "p6_anim_zm_buildable_pap_on", ( 0, 0, 0 ), "pap", "zmb_perks_packa_upgrade", "Pack-A-Punch", 5000 );
 	perk_system( "script_model", ( 5022.8, 6592.9, -17.0379 ), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "random", "mus_perks_speed_sting", "Random Perk", 1500, "sleight_light" );
+	wallweapons( "riotshield_zm", ( 5220.69, 7060, 30.875 ), ( 0, 225, 0 ), 1000 ); 
+	wallweapons( "cymbal_monkey_zm", ( 5390.69, 6946, 21.351 ), ( 0, 135, 0 ), 4000 );
+	soul_box( "zombie_perk_bottle_tombstone" );
+	door();
 }
 
 perk_system( script, pos, model, angles, type, sound, name, cost, fx, perk)
@@ -586,7 +570,7 @@ noncollision( script, pos, model, angles, type )
 door()
 {
 	level.doorcost = 1000;
-	door_model = spawn( "script_model", ( 5239.03, 6658.05, -24.875 ) );
+	door_model = spawn( "script_model", ( 5240.03, 6658.05, -24.875 ) );
 	door_model setmodel( "p_rus_door_white_window_plain_left" );
 	door_model.angles = (0, 0, 0);
     door_col = spawn( "script_model", ( 5239.03, 6658.05, -24.875 ) );
@@ -1111,6 +1095,7 @@ drawshader( shader, x, y, width, height, color, alpha, sort )
 
 drawshader_and_shadermove(perk, custom, print)
 {
+	y = 350;
     x = -345 + (self.perk_count * 30);
     for(i = 0; i < self.perkarray.size; i++)
 	{
@@ -1118,8 +1103,8 @@ drawshader_and_shadermove(perk, custom, print)
 	}
         if(perk == "Downers_Delight")
         {
-            self.perk1back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );  
-            self.perk1front = self drawshader( "waypoint_revive", x, 314, 23, 23, ( 0, 1, 1 ), 100, 0 ); 
+            self.perk1back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 0, 0, 0 ), 100, 0 );  
+            self.perk1front = self drawshader( "waypoint_revive", x, y, 23, 23, ( 0, 1, 1 ), 100, 0 ); 
             self.perk1front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk1front;
 			self.perk1back.name = perk;
@@ -1135,8 +1120,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "MULE")
         {   
-            self.perk2back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk2front = self drawshader( "menu_mp_weapons_1911", x, 314, 22, 22, ( 0, 1, 0 ), 100, 0 );
+            self.perk2back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk2front = self drawshader( "menu_mp_weapons_1911", x, y, 22, 22, ( 0, 1, 0 ), 100, 0 );
             self.perk2front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk2front;
 			self.perk2back.name = perk;
@@ -1151,8 +1136,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "PHD_FLOPPER")
         {    
-            self.perk3back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk3front = self drawshader( "hud_icon_sticky_grenade", x, 314, 23, 23, (1, 0, 1 ), 100, 0 );
+            self.perk3back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk3front = self drawshader( "hud_icon_sticky_grenade", x, y, 23, 23, (1, 0, 1 ), 100, 0 );
             self.perk3front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk3front;
 			self.perk3back.name = perk;
@@ -1167,8 +1152,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "ELECTRIC_CHERRY")
         {    
-            self.perk5back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 200 ), 100, 0 );
-            self.perk5front = self drawshader( "zombies_rank_5", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk5back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 0, 0, 200 ), 100, 0 );
+            self.perk5front = self drawshader( "zombies_rank_5", x, y, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk5front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk5front;
 			self.perk5back.name = perk;
@@ -1184,8 +1169,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}	
         if(perk == "WIDOWS_WINE")
         {    
-            self.perk6back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk6front = self drawshader( "zombies_rank_3", x + 1, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk6back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk6front = self drawshader( "zombies_rank_3", x, y, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk6front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk6front;
 			self.perk6back.name = perk;
@@ -1204,8 +1189,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Ethereal_Razor")
         {    
-            self.perk7back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 200, 0, 0 ), 100, 0 );
-            self.perk7front = self drawshader( "zombies_rank_4", x + 1, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk7back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 200, 0, 0 ), 100, 0 );
+            self.perk7front = self drawshader( "zombies_rank_4", x, y, 23, 23, ( 1, 1, 1 ), 100, 0 );
 			self.perk7front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk7front;
 			self.perk7back.name = perk;
@@ -1220,8 +1205,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
 		if(perk == "Ammo_Regen")
         {
-            self.perk8back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk8front = self drawshader( "menu_mp_lobby_icon_customgamemode", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk8back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk8front = self drawshader( "menu_mp_lobby_icon_customgamemode", x, y, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk8front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk8front;
 			self.perk8back.name = perk;
@@ -1238,8 +1223,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Dying_Wish")
         {
-            self.perk10back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 200, 0, 0 ), 100, 0 );
-            self.perk10front = self drawshader( "zombies_rank_5", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk10back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 200, 0, 0 ), 100, 0 );
+            self.perk10front = self drawshader( "zombies_rank_5", x, y, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk10front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk10front;
 			self.perk10back.name = perk;
@@ -1257,8 +1242,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "deadshot")
         {
-            self.perk11back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk11front = self drawshader( "killiconheadshot", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk11back = self drawshader( "specialty_marathon_zombies", x, y, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk11front = self drawshader( "killiconheadshot", x, y, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk11front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk11front;
 			self.perk11back.name = perk;
@@ -1644,7 +1629,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud_icon.hidewheninmenu = true;   
 		power_up_hud_icon setshader( shader, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud_icon);
-		self thread destroy_power_up_icon_hud(power_up_hud_icon, 0);
+		self thread destroy_power_up_icon_hud(power_up_hud_icon);
 	}
 	if(shader2)
 	{
@@ -1657,7 +1642,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud2_icon.hidewheninmenu = true;   
 		power_up_hud2_icon setshader( shader2, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud2_icon);
-		self thread destroy_power_up_icon_hud(0, power_up_hud2_icon);
+		self thread destroy_power_up_icon_hud2(power_up_hud2_icon);
 	}
 }
 
@@ -1699,19 +1684,18 @@ power_up_hud_icon_blink(elem)
 	}
 }
 
-destroy_power_up_icon_hud(elem, elem2)
+destroy_power_up_icon_hud(elem)
 {
 	level endon("game_ended");
-	if (s_powerup.powerup_name == "unlimited_ammo")
-	{
-		self waittill_any_timeout( "disconnect", "end_unlimited_ammo");
-		elem destroy();
-	}
-	if (s_powerup.powerup_name == "death_machine")
-	{
-		self waittill_any_timeout( "disconnect", "Death_Machine_Stop");
-		elem2 destroy();
-	}
+	self waittill_any_timeout( "disconnect", "end_unlimited_ammo");
+	elem destroy();
+}
+
+destroy_power_up_icon_hud2(elem2)
+{
+    level endon("game_ended");
+	self waittill_any_timeout( "disconnect", "Death_Machine_Stop");
+	elem2 destroy();
 }
 
 endammo()
@@ -1940,8 +1924,6 @@ flame_boss()
 	level.boss_is_alive = 1;
 	level.zombie_health = level.zombie_vars["zombie_health_start"];  
 	level.zombie_health = 20000;
-	inferno forceteleport((4657.19, 5466.76, -83.2374));
-	inferno.start_inert = 1;
 	inferno.ignore_nuke = 1;
 	inferno.ignore_enemyoverride = 1;
 	inferno setmodel("c_zom_avagadro_fb");
