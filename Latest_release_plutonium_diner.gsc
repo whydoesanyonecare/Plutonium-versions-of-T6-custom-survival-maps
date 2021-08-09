@@ -126,10 +126,9 @@ init()
 		precachemodel( "zombie_z_money_icon" );
 		precachemodel( "veh_t6_civ_movingtrk_cab_dead" );
 		precachemodel( "t6_wpn_zmb_raygun2_world" );
-
+        level turnonpower();
 		isTown();
 		init_custom_map();
-		level turnonpower();
 		level setdvars();
 		level.get_player_weapon_limit = ::custom_get_player_weapon_limit;
 		level.zombie_last_stand = ::LastStand;
@@ -385,7 +384,7 @@ custom_round_monitor()
 {
 	self endon("disconnect");
 	self endon("game_ended");
-	level.customround = level.round_number + randomintrange( 5, 8 );
+	level.customround = randomintrange( 5, 8 );
 	for(;;)
 	{
 		level waittill( "between_round_over" );
@@ -638,9 +637,9 @@ teddys()
                 buildbuildable( "dinerhatch", 1 );
 				level.rooftop_open = 1;
 
-				perk_system( "script_model", ( -5825.36, -7894.4, 224.628 ), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "custom", "mus_perks_packa_sting", "PhD Flopper", 2000, "tombstone_light", "PHD_FLOPPER" );
-				perk_system( "script_model", ( -6156.36, -7852.4, 224.628  ), "zombie_vending_tombstone_on", ( 0, 180, 0 ), "custom", "mus_perks_doubletap_sting", "Downer's Delight", 2500, "tombstone_light", "Downers_Delight" );
-				perk_system( "script_model", ( -6354.36, -7800.4, 227.628 ), "zombie_vending_tombstone_on", ( 0, 180, 0 ), "custom", "mus_perks_doubletap_sting", "Victorious Tortoise", 2500, "tombstone_light", "Victorious_Tortoise" );
+				perk_system( "script_model", ( -5825.36, -7894.4, 224.628 ), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "custom", "mus_perks_packa_sting", "PhD Flopper", 2000, "tombstone_light", "PHD_FLOPPER", "Explosion and fall damage ignored also player creates explosion when dive to prone" );
+				perk_system( "script_model", ( -6156.36, -7852.4, 224.628  ), "zombie_vending_tombstone_on", ( 0, 180, 0 ), "custom", "mus_perks_doubletap_sting", "Downer's Delight", 2500, "tombstone_light", "Downers_Delight", "Players bleedout time increased 10 seconds and current weapons used in laststand" );
+				perk_system( "script_model", ( -6354.36, -7800.4, 227.628 ), "zombie_vending_tombstone_on", ( 0, 180, 0 ), "custom", "mus_perks_doubletap_sting", "Victorious Tortoise", 2500, "tombstone_light", "Victorious_Tortoise", "Players shield block damage from all directions when in use" );
 			}
 			self notify( "shot" );
 
@@ -671,20 +670,19 @@ init_custom_map()
     shootable( ( -6338.28, -7590, 221.915 ), (0, 60, 0) );
     shootable( ( -3810.28, -7443, 98.915 ), (0, 180, 0) );
 	soul_box( "zombie_perk_bottle_tombstone" );
-	perk_system( "script_model", ( -5050.28, -7788, -62.5062 ), "zombie_vending_revive_on", ( 0, 180, 0 ), "revive" );
 	perk_system( "script_model", ( -3810.1, -7220, -59.5062 ), "zombie_vending_tombstone_on", ( 0, 270, 0 ), "original", "mus_perks_tombstone_sting", "Tombstone", 2000, "tombstone_light", "specialty_scavenger" );
 	perk_system( "script_model", ( -4590.28, -7539, -62.5062 ), "zombie_vending_jugg_on", ( 0, 270, 0 ), "original", "mus_perks_jugganog_sting", "Jugger-Nog", 2500, "jugger_light", "specialty_armorvest" );
 	perk_system( "script_model", ( -4173.1, -7750.29, -62.5062 ), "zombie_vending_doubletap2_on", ( 0, 270, 0 ), "original", "mus_perks_doubletap_sting", "Double Tap Root Beer", 2000, "doubletap_light", "specialty_rof" );
 	perk_system( "script_model", ( -6500.28, -7930, 0.5062 ), "zombie_vending_marathon_on", ( 0, 90, 0 ), "original", "mus_perks_stamin_sting", "Stamin-Up", 2000, "marathon_light", "specialty_longersprint" );
-	perk_system( "script_model", (-3545.1, -7220, -59.5062 ), "p6_anim_zm_buildable_pap_on", ( 0,  315, 0 ), "pap", "zmb_perks_packa_upgrade", "Pack-A-Punch", 5000 );
-	perk_system( "script_model", ( -5440.1, -7884, -59.875 ), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "custom", "mus_perks_deadshot_sting", "Widow's Wine", 4000, "tombstone_light", "WIDOWS_WINE" );
-	perk_system( "script_model", ( -5151.1, -5410, -63.875 ), "zombie_vending_tombstone_on", ( 0, -45, 0 ), "custom", "mus_perks_packa_sting", "Electric Cherry", 2000, "tombstone_light", "ELECTRIC_CHERRY" );
-	perk_system( "script_model", ( -5912.1, -7355, -63.875 ), "zombie_vending_tombstone_on", ( 0, 180, 0 ), "custom", "mus_perks_doubletap_sting", "Ethereal Razor", 4000, "tombstone_light", "Ethereal_Razor" );
-	perk_system( "script_model", ( -4204.1, -5885, -69.34 ), "zombie_vending_tombstone_on", ( 0, -35, 0 ), "custom", "mus_perks_doubletap_sting", "Mule Kick", 4000, "tombstone_light", "MULE" );
-
+	perk_system( "script_model", ( -5440.1, -7884, -59.875 ), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "custom", "mus_perks_deadshot_sting", "Widow's Wine", 4000, "tombstone_light", "WIDOWS_WINE", "Damages zombies around player when touched and grenades are upgraded" );
+	perk_system( "script_model", ( -5151.1, -5410, -63.875 ), "zombie_vending_tombstone_on", ( 0, -45, 0 ), "custom", "mus_perks_packa_sting", "Electric Cherry", 2000, "tombstone_light", "ELECTRIC_CHERRY", "It creates an electric shockwave around the player whenever they reload" );
+	perk_system( "script_model", ( -5912.1, -7355, -63.875 ), "zombie_vending_tombstone_on", ( 0, 180, 0 ), "custom", "mus_perks_doubletap_sting", "Ethereal Razor", 4000, "tombstone_light", "Ethereal_Razor", "Players melee attacks does extra damage and restore a small amount of health" );
+	perk_system( "script_model", ( -4204.1, -5885, -69.34 ), "zombie_vending_tombstone_on", ( 0, -35, 0 ), "custom", "mus_perks_doubletap_sting", "Mule Kick", 4000, "tombstone_light", "MULE", "Enables additional primary weapon slot for player " );
+    perk_system( "script_model", (-3545.1, -7220, -59.5062 ), "p6_anim_zm_buildable_pap_on", ( 0,  315, 0 ), "pap", "zmb_perks_packa_upgrade", "Pack-A-Punch", 5000 );
+	perk_system( "script_model", ( -5050.28, -7788, -62.5062 ), "zombie_vending_revive_on", ( 0, 180, 0 ), "revive" );
 }
 
-perk_system( script, pos, model, angles, type, sound, name, cost, fx, perk)
+perk_system( script, pos, model, angles, type, sound, name, cost, fx, perk, hint)
 {
 	col = spawn( script, pos);
 	col setmodel( model );
@@ -694,7 +692,7 @@ perk_system( script, pos, model, angles, type, sound, name, cost, fx, perk)
 	x.angles = angles;
 	if(type != "revive")
 	{
-    	col thread buy_system( perk, sound, name, cost, type );
+    	col thread buy_system( perk, sound, name, cost, type, hint );
 	}
 	if(type != "pap" && type != "revive" )
     {
@@ -708,7 +706,54 @@ perk_system( script, pos, model, angles, type, sound, name, cost, fx, perk)
 	}
 }
 
-buy_system( perk, sound, name, cost, type )
+drawshader(shader, align, relative, x, y, width, height, color, alpha, sort)
+{
+    element = newclienthudelem(self);
+    element.elemtype = "bar";
+    element.hidewheninmenu = true;
+    element.shader = shader;
+    element.width = width;
+    element.height = height;
+    element.align = align;
+    element.relative = relative;
+    element.xoffset = 0;
+    element.yoffset = 0;
+    element.children = [];
+    element.sort = sort;
+    element.color = color;
+    element.alpha = alpha;
+    element setparent(level.uiparent);
+    element setshader(shader, width, height);
+    element setpoint(align, relative, x, y);
+    element.hidden = true;
+	wait 0.20;
+	element destroy();
+}
+
+lower_hint(hint)
+{
+	spawn = self createfontstring("default" , 1.3);
+    spawn setPoint("CENTER", "TOP", 0, 284);
+	spawn.hidewheninmenu = 1;
+	spawn settext(hint);
+	wait 0.20;
+	spawn destroy();
+}
+
+background(name)
+{
+	if(name == "Mule Kick" || name == "Victorious Tortoise")	
+	{
+		width = 280;
+	}
+	else
+	{
+		width = 390;
+	}
+	self thread drawshader("black", "CENTER", "TOP", 0, 275, width, 40, (0,0,0), 0.3, 1);
+}
+
+buy_system( perk, sound, name, cost, type, hint )
 {
     self endon( "game_ended" );
     while( 1 )
@@ -717,10 +762,15 @@ buy_system( perk, sound, name, cost, type )
         {
             if(!player.machine_is_in_use)
 			{
-                if( distance( self.origin, player.origin ) <= 70 )
+                if( distance( self.origin, player.origin ) <= 60 )
                 {
-				    player thread SpawnHint( self.origin, 30, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
-                    if( type != "pap" && player usebuttonpressed() && !player hasperk(perk) && !player hascustomperk(perk) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
+				    player thread SpawnHint( self.origin, 60, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
+					if(type == "custom")
+					{
+						player thread lower_hint( hint );
+						player thread background( name );
+					}
+					if( type != "pap" && player usebuttonpressed() && !player hasperk(perk) && !player hascustomperk(perk) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
                     {
                         player.machine_is_in_use = 1;
                         player playsound( "zmb_cha_ching" );
@@ -728,7 +778,7 @@ buy_system( perk, sound, name, cost, type )
                         player playsound( sound );
                         if(type == "custom")
                         {
-				    	    player thread drawshader_and_shadermove( perk, 1, 1 );
+				    	    player thread drawshader_and_shadermove( perk, 1, 0 );
                         }
                         if(type == "original")
                         {
@@ -1801,7 +1851,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud_icon.hidewheninmenu = true;   
 		power_up_hud_icon setshader( shader, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud_icon);
-		self thread destroy_power_up_icon_hud(power_up_hud_icon, 0);
+		self thread destroy_power_up_icon_hud(power_up_hud_icon);
 	}
 	if(shader2)
 	{
@@ -1814,7 +1864,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud2_icon.hidewheninmenu = true;   
 		power_up_hud2_icon setshader( shader2, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud2_icon);
-		self thread destroy_power_up_icon_hud(0, power_up_hud2_icon);
+		self thread destroy_power_up_icon_hud2(power_up_hud2_icon);
 	}
 }
 
@@ -1856,20 +1906,20 @@ power_up_hud_icon_blink(elem)
 	}
 }
 
-destroy_power_up_icon_hud(elem, elem2)
+destroy_power_up_icon_hud(elem)
 {
 	level endon("game_ended");
-	if (s_powerup.powerup_name == "unlimited_ammo")
-	{
-		self waittill_any_timeout( "disconnect", "end_unlimited_ammo");
-		elem destroy();
-	}
-	if (s_powerup.powerup_name == "death_machine")
-	{
-		self waittill_any_timeout( "disconnect", "Death_Machine_Stop");
-		elem2 destroy();
-	}
+	self waittill_any_timeout( 30, "disconnect", "end_unlimited_ammo");
+	elem destroy();
 }
+
+destroy_power_up_icon_hud2(elem2)
+{
+	level endon("game_ended");
+	self waittill_any_timeout( 30, "disconnect", "Death_Machine_Stop");
+	elem2 destroy();
+}
+
 
 endammo()
 {
