@@ -1,4 +1,4 @@
-//nacht console
+//nacht Plutonium
 
 #include maps/mp/_utility;
 #include common_scripts/utility;
@@ -107,7 +107,7 @@ init()
 		precachemodel( "collision_geo_256x256x10_standard" );
 		precachemodel( "zombie_teddybear" );
 		precachemodel( "zombie_z_money_icon" );
-
+		level.openeddoor = 0;
         box_init();
 		init_custom_map();
 		level setdvars();
@@ -127,8 +127,9 @@ init()
         level.player_out_of_playable_area_monitor = 0;
 		level.perk_purchase_limit = 20;
 		level thread drawZombiesCounter();
+		level thread move_spawners();
 		level thread onPlayerConnect();
-		level thread teleport_zombies();
+        level thread night_mode();
         level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
 	}
@@ -143,14 +144,79 @@ init()
 	}
 }
 
+
+move_spawners()
+{
+	flag_wait( "initial_blackscreen_passed" );
+	level.zombie_spawn_locations[0].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[1].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[2].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[6].origin = (13610, -541, -188);
+	level.zombie_spawn_locations[7].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[8].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[9].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[10].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[11].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[12].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[13].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[14].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[15].origin = (13610, -541, -188);
+	level.zombie_spawn_locations[16].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[17].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[18].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[19].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[20].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[21].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[22].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[23].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[24].origin = (13610, -541, -188);
+	while(1)
+	{
+		if(level.openeddoor)
+		{
+			level.zombie_spawn_locations[0].origin = (13238, -828, -217.9);
+			level.zombie_spawn_locations[1].origin = (12207, -16, -197.3);
+			level.zombie_spawn_locations[2].origin = (13321, -382, -202.86);
+			level.zombie_spawn_locations[9].origin = (13213, -993, -216);
+			level.zombie_spawn_locations[12].origin = (13444, 18, -180);
+			level.zombie_spawn_locations[14].origin = (13276, 1030, -211);
+			level.zombie_spawn_locations[6].origin = (13226, 54, -199.4);
+			level.zombie_spawn_locations[23].origin = (13276, 1030, -211);
+			break;
+		}
+		wait 1;
+	}
+}
+
+night_mode()
+{
+	level waittill( "connected", player );
+	player setclientdvar( "r_dof_enable", 0 );
+	player setclientdvar( "r_lodBiasRigid", -1000 );
+	player setclientdvar( "r_lodBiasSkinned", -1000 );
+	player setclientdvar( "r_enablePlayerShadow", 1 );
+	player setclientdvar( "r_skyTransition", 1 );
+	player setclientdvar( "sm_sunquality", 2 );
+	player setclientdvar( "vc_fbm", "0 0 0 0" );
+	player setclientdvar( "vc_fsm", "1 1 1 1" );
+	player setclientdvar( "r_filmUseTweaks", 1 );
+	player setclientdvar( "r_bloomTweaks", 1 );
+	player setclientdvar( "r_exposureTweak", 1 );
+	player setclientdvar( "vc_rgbh", "0.1 0 0.3 0" );
+    player setclientdvar( "vc_yl", "0 0 0.25 0" );
+	player setclientdvar( "vc_yh", "0.02 0 0.1 0" );
+	player setclientdvar( "vc_rgbl", "0.02 0 0.1 0" );
+	player setclientdvar( "r_exposureValue", 3.9 );
+	player setclientdvar( "r_lightTweakSunLight", 1 );
+	player setclientdvar( "r_sky_intensity_factor0", 0 );
+    level.default_r_exposureValue = getDvar( "r_exposureValue" );
+	level.default_r_lightTweakSunLight = getDvar( "r_lightTweakSunLight" );
+	level.default_r_sky_intensity_factor0 = getDvar( "r_sky_intensity_factor0" );
+}
+
 setdvars()
 {
-	setdvar( "party_connectToOthers", "0" );
-	setdvar( "partyMigrate_disabled", "1" );
-	setdvar( "party_mergingEnabled", "0" );
-	setdvar( "party_iamhost", "1" );
-	setdvar( "party_host", "1" );
-	setdvar( "allowAllNAT", "1" );
+    setdvar("r_fog", "0");
 	setDvar( "scr_screecher_ignore_player", 1 );
 	setdvar( "ui_errorMessage", "^9Thank you for playing this Custom Survival Map");
 	setdvar( "ui_errorTitle", "^1Nacht" );
@@ -186,10 +252,7 @@ onPlayerSpawned()
 	flag_wait( "start_zombie_round_logic" );
 	wait 4;
 	self iprintln( "Nacht - Survival" );
-	if(self ishost())
-	{
-		self thread boss_round_monitor();
-	}
+	self thread boss_round_monitor();
 	for(;;)
 	{
 		self waittill( "spawned_player" );
@@ -201,46 +264,6 @@ onPlayerSpawned()
 		{
 			self.score = 2500;
 		}
-	}
-}
-
-teleport_zombies()
-{
-	self endon("disconnect");
-    speed = [];
-	speed[0] = "run";
-	speed[1] = "sprint";
-    teleport = [];
-	teleport[0] = (13226, 54, -199.44);
-	teleport[1] = (13276, 1030, -211);
-	teleport[2] = (13578, -1607, -188);
-	teleport[3] = (14013, -569, -188);
-	for(;;)
-	{	
-		foreach(zombie in getAiArray(level.zombie_team))
-		{
-            if(level.round_number < 5)
-            {
-                if( !(IsDefined( zombie.run_set )) )
-			    {
-				    zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] ); 
-			    	zombie.run_set = 1;
-			    }
-            }
-            if(distance( zombie.origin, (10505.8, -663, -186.5195) ) < 2100)
-			{
-				zombie forceteleport(teleport[randomintrange(0, 4)]);
-				zombie thread find_flesh();
-				zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] );
-			}
-			if(distance( zombie.origin, (12775.8, -663, -186.5195) ) < 90)
-			{
-				zombie forceteleport(teleport[randomintrange(0, 4)]);
-				zombie thread find_flesh();
-				zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] );
-			}
-		}
-		wait 0.3;
 	}
 }
 
@@ -319,19 +342,19 @@ SpawnPoint()
 	player = level.players;
 	if( player[ 0] == self )
 	{
-		player[ 0] setorigin( (13732.2,-715.697,-188.875 ) );
+		player[ 0] setorigin( (13732.2,-675.697,-188.875 ) );
 	}
 	if( player[ 1] == self )
 	{
-		player[ 1] setorigin( (13722.2,-735.697,-188.875) );
+		player[ 1] setorigin( (13702.2,-745.697,-188.875) );
 	}
 	if( player[ 2] == self )
 	{
-		player[ 2] setorigin( (13742.2,-705.697,-188.875 ) );
+		player[ 2] setorigin( (13752.2,-705.697,-188.875 ) );
 	}
 	if( player[ 3] == self )
 	{
-		player[ 3] setorigin( (13702.2,-685.697,-188.875 ) );
+		player[ 3] setorigin( (13692.2,-685.697,-188.875 ) );
 	}
 
 }
@@ -858,7 +881,7 @@ Custom_death_callback( einflictor, eattacker, idamage, idflags, smeansofdeath, s
 	if(level.soulbox_active)
 	{
 
-		if( distance( level.soulbox.origin, self.origin ) <= 350 )
+		if( distance( level.soulbox.origin, self.origin ) <= 300 )
 		{
 			self souls( level.soulbox.origin );
 			playfx(loadfx("misc/fx_zombie_powerup_solo_grab"), level.soulbox.origin );
@@ -874,7 +897,7 @@ Custom_death_callback( einflictor, eattacker, idamage, idflags, smeansofdeath, s
 	if(level.soulbox1_active)
 	{
 
-		if( distance( level.soulbox1.origin, self.origin ) <= 350 )
+		if( distance( level.soulbox1.origin, self.origin ) <= 300 )
 		{
 			self souls( level.soulbox1.origin );
 			playfx(loadfx("misc/fx_zombie_powerup_solo_grab"), level.soulbox1.origin );
@@ -889,7 +912,7 @@ Custom_death_callback( einflictor, eattacker, idamage, idflags, smeansofdeath, s
 	}
 	if(level.soulbox2_active)
 	{
-		if( distance( level.soulbox2.origin, self.origin ) <= 350 )
+		if( distance( level.soulbox2.origin, self.origin ) <= 300 )
 		{
 			self souls( level.soulbox2.origin );
 			playfx(loadfx("misc/fx_zombie_powerup_solo_grab"), level.soulbox2.origin );
@@ -1001,15 +1024,15 @@ drawshader( shader, x, y, width, height, color, alpha, sort )
 
 drawshader_and_shadermove(perk, custom, print)
 {
-    x = -345 + (self.perk_count * 30);
+    x = -408 + (self.perk_count * 30);
     for(i = 0; i < self.perkarray.size; i++)
 	{
     	self.perkarray[i].x = self.perkarray[i].x + 30;
 	}
         if(perk == "Downers_Delight")
         {
-            self.perk1back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );  
-            self.perk1front = self drawshader( "waypoint_revive", x, 314, 23, 23, ( 0, 1, 1 ), 100, 0 ); 
+            self.perk1back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );  
+            self.perk1front = self drawshader( "waypoint_revive", x, 350, 23, 23, ( 0, 1, 1 ), 100, 0 ); 
             self.perk1front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk1front;
 			self.perk1back.name = perk;
@@ -1025,8 +1048,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "MULE")
         {   
-            self.perk2back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk2front = self drawshader( "menu_mp_weapons_1911", x, 314, 22, 22, ( 0, 1, 0 ), 100, 0 );
+            self.perk2back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk2front = self drawshader( "menu_mp_weapons_1911", x, 350, 22, 22, ( 0, 1, 0 ), 100, 0 );
             self.perk2front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk2front;
 			self.perk2back.name = perk;
@@ -1041,8 +1064,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "PHD_FLOPPER")
         {    
-            self.perk3back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk3front = self drawshader( "hud_icon_sticky_grenade", x, 314, 23, 23, (1, 0, 1 ), 100, 0 );
+            self.perk3back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk3front = self drawshader( "hud_icon_sticky_grenade", x, 350, 23, 23, (1, 0, 1 ), 100, 0 );
             self.perk3front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk3front;
 			self.perk3back.name = perk;
@@ -1057,8 +1080,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "ELECTRIC_CHERRY")
         {    
-            self.perk5back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 200 ), 100, 0 );
-            self.perk5front = self drawshader( "zombies_rank_5", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk5back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 200 ), 100, 0 );
+            self.perk5front = self drawshader( "zombies_rank_5", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk5front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk5front;
 			self.perk5back.name = perk;
@@ -1074,8 +1097,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}	
         if(perk == "WIDOWS_WINE")
         {    
-            self.perk6back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk6front = self drawshader( "zombies_rank_3", x + 1, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk6back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk6front = self drawshader( "zombies_rank_3", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk6front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk6front;
 			self.perk6back.name = perk;
@@ -1094,8 +1117,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Ethereal_Razor")
         {    
-            self.perk7back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 200, 0, 0 ), 100, 0 );
-            self.perk7front = self drawshader( "zombies_rank_4", x + 1, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk7back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
+            self.perk7front = self drawshader( "zombies_rank_4", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
 			self.perk7front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk7front;
 			self.perk7back.name = perk;
@@ -1110,8 +1133,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
 		if(perk == "Ammo_Regen")
         {
-            self.perk8back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk8front = self drawshader( "menu_mp_lobby_icon_customgamemode", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk8back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk8front = self drawshader( "menu_mp_lobby_icon_customgamemode", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk8front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk8front;
 			self.perk8back.name = perk;
@@ -1128,8 +1151,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Dying_Wish")
         {
-            self.perk10back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 200, 0, 0 ), 100, 0 );
-            self.perk10front = self drawshader( "zombies_rank_5", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk10back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
+            self.perk10front = self drawshader( "zombies_rank_5", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk10front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk10front;
 			self.perk10back.name = perk;
@@ -1147,8 +1170,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "deadshot")
         {
-            self.perk11back = self drawshader( "specialty_marathon_zombies", x, 314, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk11front = self drawshader( "killiconheadshot", x, 314, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk11back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            self.perk11front = self drawshader( "killiconheadshot", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk11front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk11front;
 			self.perk11back.name = perk;
@@ -1795,10 +1818,13 @@ boss_round_monitor()
 		level waittill( "between_round_over" );
 		flag_wait( "start_zombie_round_logic" );
 		player = level.players;
-		if( level.round_number == level.bossround ) 
-		{
-			self thread flame_boss();
-		}
+        if(self == player[0])
+        {
+		    if( level.round_number == level.bossround ) 
+		    {
+			    self thread flame_boss();
+		    }
+        }
 		while(level.boss_is_alive)
 		{
        		if(level.inferno.health > 0 && level.boss_is_alive)
@@ -1812,7 +1838,8 @@ boss_round_monitor()
 				self notify("stop_flame_sounds");
         		playfx(loadfx("explosions/fx_default_explosion"), level.inferno.origin, anglestoforward( ( 0, 45, 55 ) ) ); 
         		RadiusDamage(level.inferno.origin, 200, 3000, 2999, level.inferno);
-				specific_powerup_drop(power_up[ randomintrange( 0, 7 )], level.inferno.origin );
+                player = level.players;
+                player[0] specific_powerup_drop(power_up[ randomintrange( 0, 7 )], level.inferno.origin );
 				level waittill("end_of_round");
 				level.bossround = level.round_number + 4;
 			}
@@ -1828,18 +1855,11 @@ flame_boss()
 	self endon("death");
 	self endon("boss_dead");
 	level endon("end_of_round");
-    spawn = [];
-    spawn[0] = (13416.19, -22.76, -187.2374);
-    spawn[1] = (13128, -999, -210);
-    spawn[2] = (13766, -1550, -167);
-    spawn[3] = (13762, -497, -188);
 	spawner = random( level.zombie_spawners );
 	inferno = spawn_zombie( spawner );
 	level.boss_is_alive = 1;
 	level.zombie_health = level.zombie_vars["zombie_health_start"];  
 	level.zombie_health = 20000;
-	inferno forceteleport(spawn[randomintrange(0, 4)]);
-	inferno.start_inert = 1;
 	inferno.ignore_nuke = 1;
 	inferno.ignore_enemyoverride = 1;
 	inferno setmodel("c_zom_avagadro_fb");
@@ -1858,6 +1878,7 @@ flame_boss()
 			inferno thread burning_boss_fx();
 			maps\mp\_visionset_mgr::vsmgr_activate("overlay", "zm_transit_burn", self, 1, 1);
 			self thread player_burning_audio();
+    		inferno maps/mp/zombies/_zm_utility::set_zombie_run_cycle( "run" );
 			wait 1;
 			self.waiting_explosion = 0;
 			while(distance(self.origin, inferno.origin) < 200 && level.boss_is_alive)
