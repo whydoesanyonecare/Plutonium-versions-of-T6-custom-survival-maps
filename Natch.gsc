@@ -129,7 +129,7 @@ init()
 		level thread drawZombiesCounter();
 		level thread move_spawners();
 		level thread onPlayerConnect();
-        level thread night_mode();
+        //level thread night_mode(); ENABLE NIGHT MODE
         level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
 	}
@@ -150,18 +150,21 @@ move_spawners()
 	flag_wait( "initial_blackscreen_passed" );
 	level.zombie_spawn_locations[0].origin = (13578, -1607, -188);
 	level.zombie_spawn_locations[1].origin = (14013, -569, -188);
-	level.zombie_spawn_locations[2].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[6].origin = (13610, -541, -188);
-	level.zombie_spawn_locations[7].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[8].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[9].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[10].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[11].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[12].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[13].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[14].origin = (13594, -1037, -188);
-	level.zombie_spawn_locations[15].origin = (13610, -541, -188);
-	level.zombie_spawn_locations[16].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[2].origin = (14238, -996, -196);
+	level.zombie_spawn_locations[3].origin = (13877, -1809, -198);
+	level.zombie_spawn_locations[4].origin = (14238, -996, -196);
+	level.zombie_spawn_locations[5].origin = (13229, -1294, -198);
+	level.zombie_spawn_locations[6].origin = (13877, -1809, -198);
+	level.zombie_spawn_locations[7].origin = (14238, -996, -196);
+	level.zombie_spawn_locations[8].origin = (13877, -1809, -198);
+	level.zombie_spawn_locations[9].origin = (14238, -996, -196);
+	level.zombie_spawn_locations[10].origin = (13229, -1294, -188);
+	level.zombie_spawn_locations[11].origin = (14238, -996, -196);
+	level.zombie_spawn_locations[12].origin = (13877, -1809, -198);
+	level.zombie_spawn_locations[13].origin = (14238, -996, -196);
+	level.zombie_spawn_locations[14].origin = (13877, -1809, -198);
+	level.zombie_spawn_locations[15].origin = (13877, -1809, -198);
+	level.zombie_spawn_locations[16].origin = (14013, -569, -188);
 	level.zombie_spawn_locations[17].origin = (14013, -569, -188);
 	level.zombie_spawn_locations[18].origin = (14013, -569, -188);
 	level.zombie_spawn_locations[19].origin = (14013, -569, -188);
@@ -169,7 +172,8 @@ move_spawners()
 	level.zombie_spawn_locations[21].origin = (13578, -1607, -188);
 	level.zombie_spawn_locations[22].origin = (13578, -1607, -188);
 	level.zombie_spawn_locations[23].origin = (13578, -1607, -188);
-	level.zombie_spawn_locations[24].origin = (13610, -541, -188);
+	level.zombie_spawn_locations[24].origin = (13877, -1809, -198);
+	level.zombie_spawn_locations[25].origin = (13877, -1809, -198);
 	while(1)
 	{
 		if(level.openeddoor)
