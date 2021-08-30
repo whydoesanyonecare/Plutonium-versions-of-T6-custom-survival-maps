@@ -1,4 +1,4 @@
-# Plutonium versions of survival custom maps
+# Plutonium versions of custom survival maps
 
 Installion Guide for Compiled file: https://forum.plutonium.pw/topic/6966/how-to-use-a-mod-menu-without-injecting-loading-gsc-scripts-client-sided
 
