@@ -11,7 +11,7 @@ Custom perk icons are only in correct spot while using 1080p or 720p. in other r
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-MAP The Bus:
+MAP The Bus: >> map may have bugs please report any you find.
 
 This map uses TranZit
 
