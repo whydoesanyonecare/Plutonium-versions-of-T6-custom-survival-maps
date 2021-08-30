@@ -11,6 +11,32 @@ Custom perk icons are only in correct spot while using 1080p or 720p. in other r
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+MAP The Bus:
+
+This map uses TranZit
+
+Made additional start / safe area to this custom survival map
+
+in safearea is Pack a Punch, Mystery box and Perks.
+
+9 Custom Perks:
+
+  - Widow's Wine
+  - Ethereal Razor
+  - PhD Flopper
+  - Mule kick
+  - Electric Cherry
+  - Downer's Delight
+  - Ammo regen
+  - Deadshot
+  - Dying wish
+
+from bus you are able to teleport to safe area [cost: 5000]
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 MAP DINER:
 
 This map uses TranZit
