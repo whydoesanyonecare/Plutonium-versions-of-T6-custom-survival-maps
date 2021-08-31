@@ -86,13 +86,11 @@ init()
         register_player_damage_callback( ::playerdamagelastcheck );
         level.effect_WebFX = loadfx("misc/fx_zombie_powerup_solo_grab");
         level._effect[ "screecher_vortex" ] = loadfx( "maps/zombie/fx_zmb_screecher_vortex" );
-		include_zombie_powerup("teller_withdrawl");
-		add_zombie_powerup( "teller_withdrawl", "zombie_z_money_icon", &"ZOMBIE_TELLER_PICKUP_DEPOSIT", ::func_should_always_drop, 1, 0, 0 );	
+        safe_area();
 		level thread onPlayerConnect();
 		level thread drawZombiesCounter();
         level thread disable_avogadro_spawn();
         level maps\mp\zombies\_zm_game_module::turn_power_on_and_open_doors();
-        safe_area();
         box_init();
         remove();
         setdvar("r_fog", "0");
@@ -101,6 +99,11 @@ init()
 	    level.pers_upgrades = [];
         //level.the_bus.skip_next_destination = 1; //nonstop bus ride
         level thread bus_tele();
+        level.power_up = [];
+		level.power_up[0] = "nuke";
+		level.power_up[1] = "insta_kill";
+		level.power_up[2] = "double_points";
+		level.power_up[3] = "full_ammo";
 	}
 	else
 	{
@@ -136,7 +139,7 @@ onplayerspawned()
     self spawnpoint();
     self thread timer();
     flag_wait( "initial_blackscreen_passed" );
-    wait 4;
+    wait 3;
     self iprintln("The ^1Bus ^7Ride - Survival");
     for(;;)
     {
@@ -197,7 +200,7 @@ drawZombiesCounter()
 {
 	flag_wait( "initial_blackscreen_passed" );
     playfx(loadfx(  "maps/zombie/fx_zmb_screecher_vortex" ), ( 10100, 8525, 1010 ), anglestoforward( ( 90, -90, 0 ) ) );
-    thread spawn_infinite_powerup_drop( (10350, 8580, 965), "full_ammo" );
+    thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
     level.zombiesCounter = createServerFontString("hudsmall" , 1.9);
     level.zombiesCounter setPoint("RIGHT", "TOP", 315, "RIGHT");
     while(true)
@@ -274,31 +277,31 @@ SpawnPoint()
 	}
 	if( player[ 1] == self )
 	{
-		player[ 1] setorigin( (10100, 8716, 965) );
+		player[ 1] setorigin( (10130, 8770, 970) );
 	}
 	if( player[ 2] == self )
 	{
-		player[ 2] setorigin( (10150, 8700, 965) );
+		player[ 2] setorigin( (10150, 8720, 970) );
 	}
 	if( player[ 3] == self )
 	{
-		player[ 3] setorigin( (10140, 8696, 965));
+		player[ 3] setorigin( (10140, 8690, 970));
 	}
 	if( player[ 4] == self )
 	{
-		player[ 4] setorigin( (10130, 8766, 970) );
+		player[ 4] setorigin( (10130, 8770, 970) );
 	}
 	if( player[ 5] == self )
 	{
-		player[ 5] setorigin( (10110, 8666, 965) );
+		player[ 5] setorigin( (10110, 8690, 970) );
 	}
 	if( player[ 6] == self )
 	{
-		player[ 6] setorigin( (10160, 8710, 965) );
+		player[ 6] setorigin( (10160, 8710, 970) );
 	}
 	if( player[ 7] == self )
 	{
-		player[ 7] setorigin( (10170, 8636, 965));
+		player[ 7] setorigin( (10170, 8680, 970));
 	}
 }
 
@@ -1584,8 +1587,7 @@ spawn_infinite_powerup_drop( v_origin, str_type )
 	level._powerup_timeout_override = undefined;
     wait 60;
     intro_powerup delete();
-    wait 1;
-    thread spawn_infinite_powerup_drop( (10350, 8580, 965), "full_ammo" );
+    thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
 }
 
 infinite()
