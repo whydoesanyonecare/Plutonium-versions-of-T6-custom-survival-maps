@@ -89,7 +89,7 @@ init()
         safe_area();
 		level thread onPlayerConnect();
 		level thread drawZombiesCounter();
-        level thread disable_avogadro_spawn();
+        level thread teleport_avogadro();
         level maps\mp\zombies\_zm_game_module::turn_power_on_and_open_doors();
         box_init();
         remove();
@@ -141,7 +141,9 @@ onplayerspawned()
 	self.score = 5000;
     self spawnpoint();
     self thread timer();
+	self thread lag_failsafe();
     flag_wait( "initial_blackscreen_passed" );
+	playfx(loadfx( "maps/zombie/fx_zmb_screecher_vortex" ), ( 10100, 8525, 1010 ), anglestoforward( ( 90, -90, 0 ) ) );
     wait 3;
     self iprintln("The ^1Bus ^7Ride - Survival");
     for(;;)
@@ -156,23 +158,37 @@ onplayerspawned()
     }
 }
 
-disable_avogadro_spawn()
+lag_failsafe()
 {
-    flag_wait( "initial_blackscreen_passed" );
-    for(;;)
-    {
-        while(level.zombie_avogadro_locations.size <= 0)
-        {
-            wait 0.1;
-        }
-        i = 0;
-        while(i < level.zombie_avogadro_locations.size)
-        {
-            level.zombie_avogadro_locations[i].is_enabled = 0;
-            i++;
-        }
-        wait 1;
-    }
+	flag_wait( "initial_blackscreen_passed" );
+	x = randomfloatrange(10, 40);
+    y = randomfloatrange(10, 40);
+	for(;;)
+	{
+		if(distance((10180, 8716, 970), self.origin) > 400 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
+		{
+			self setorigin((level.the_bus.origin + (x,y,20)));
+			iprintln("teleported");
+		}
+		wait .1;
+	}
+}
+
+teleport_avogadro()
+{
+	self endon("disconnect");
+	flag_wait( "initial_blackscreen_passed" );
+	for(;;)
+	{	
+		foreach(zombie in getAiArray(level.zombie_team))
+		{
+			if( isDefined( zombie.is_avogadro ) && zombie.is_avogadro )
+			{
+				zombie forceteleport(( 1588.01, 62.551, 1000.875 ));
+			}
+		}
+		wait 0.3;
+	}
 }
 
 portal()
@@ -202,7 +218,6 @@ portal()
 drawZombiesCounter()
 {
 	flag_wait( "initial_blackscreen_passed" );
-    playfx(loadfx(  "maps/zombie/fx_zmb_screecher_vortex" ), ( 10100, 8525, 1010 ), anglestoforward( ( 90, -90, 0 ) ) );
     thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
     level.zombiesCounter = createServerFontString("hudsmall" , 1.9);
     level.zombiesCounter setPoint("RIGHT", "TOP", 315, "RIGHT");
@@ -324,12 +339,12 @@ remove()
 timer()
 {
     flag_wait( "initial_blackscreen_passed" );
-    level.timer = createFontString("hudsmall" , 1.8);
-    level.timer setPoint("MIDDLE", "TOP");
+    self.timer = createFontString("hudsmall" , 1.8);
+    self.timer setPoint("MIDDLE", "TOP");
     for(i=60;i>-1;i--)
     {
-		level.timer.label = &"You will be teleported out of safe area in ^1";
-        level.timer setValue( i );
+		self.timer.label = &"You will be teleported out of safe area in ^1";
+        self.timer setValue( i );
         if(i == 0)
         {
             x = randomfloatrange(10, 20);
@@ -343,7 +358,7 @@ timer()
         }
         wait 1;
     }
-	level.timer destroy();
+	self.timer destroy();
 }
 
 safe_area()
@@ -605,7 +620,7 @@ buy_system( perk, sound, name, cost, type )
 			{
                 if( distance( self.origin, player.origin ) <= 70 )
                 {
-			    	player thread SpawnHint( self.origin, 30, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
+			    	player thread SpawnHint( self.origin, 45, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
                     
 					if(type != "random" && type != "pap" && player usebuttonpressed() && !player hascustomperk(perk) && !player hasperk(perk) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
                     {
@@ -679,15 +694,15 @@ perksquickr()
 		{
 			if(!player.machine_is_in_use)
 			{
-				if( distance( self.origin, player.origin ) <= 60 ) 
+				if( distance( self.origin, player.origin ) <= 70 ) 
 				{
                     if(players.size > 1)
                     {
-						player thread SpawnHint( self.origin, 30, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for Revive [Cost: 1500]" );
+						player thread SpawnHint( self.origin, 45, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for Revive [Cost: 1500]" );
                     }
                     else
                     {
-					    player thread SpawnHint( self.origin, 30, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for Revive [Cost: 500]" );
+					    player thread SpawnHint( self.origin, 45, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for Revive [Cost: 500]" );
                     }
 					if((players.size > 1) && player usebuttonpressed() && !(player hasperk( "specialty_quickrevive" )) && (player.score >= 1500) && !(self.lock) && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand()) 
 					{
@@ -858,12 +873,12 @@ drawshader_and_shadermove(perk, custom, print)
 	}
         if(perk == "Downers_Delight")
         {
-            self.perk1back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );  
+            //self.perk1back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );  
             self.perk1front = self drawshader( "waypoint_revive", x, 350, 23, 23, ( 0, 1, 1 ), 100, 0 ); 
             self.perk1front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk1front;
-            self.perk1back.name = perk;
-			self.perkarray[self.perkarray.size] = self.perk1back;
+            //self.perk1back.name = perk;
+			//self.perkarray[self.perkarray.size] = self.perk1back;
 			self.num_perks++;
 			self thread DDown();
 			if(print)
@@ -875,12 +890,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "MULE")
         {   
-            self.perk2back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            //self.perk2back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
             self.perk2front = self drawshader( "menu_mp_weapons_1911", x, 350, 22, 22, ( 0, 1, 0 ), 100, 0 );
             self.perk2front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk2front;
-			self.perk2back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk2back;
+			//self.perk2back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk2back;
 			self.num_perks++;
 			if(print)
 			{
@@ -891,12 +906,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "PHD_FLOPPER")
         {    
-            self.perk3back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            //self.perk3back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
             self.perk3front = self drawshader( "hud_icon_sticky_grenade", x, 350, 23, 23, (1, 0, 1 ), 100, 0 );
             self.perk3front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk3front;
-			self.perk3back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk3back;
+			//self.perk3back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk3back;
 			self.num_perks++;
 			if(print)
 			{
@@ -907,12 +922,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "ELECTRIC_CHERRY")
         {    
-            self.perk4back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 200 ), 100, 0 );
+            //self.perk4back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 200 ), 100, 0 );
             self.perk4front = self drawshader( "zombies_rank_5", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk4front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk4front;
-			self.perk4back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk4back;
+			//self.perk4back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk4back;
 			self.num_perks++;
 			self thread start_ec();
 			if(print)
@@ -924,12 +939,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}	
         if(perk == "WIDOWS_WINE")
         {    
-            self.perk5back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            //self.perk5back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
             self.perk5front = self drawshader( "zombies_rank_3", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk5front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk5front;
-			self.perk5back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk5back;
+			//self.perk5back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk5back;
 			self.num_perks++;
 			self takeweapon( self get_player_lethal_grenade() );
 			self set_player_lethal_grenade( "sticky_grenade_zm" );
@@ -944,12 +959,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Ethereal_Razor")
         {    
-            self.perk6back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
+            //self.perk6back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
             self.perk6front = self drawshader( "zombies_rank_4", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
 			self.perk6front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk6front;
-			self.perk6back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk6back;
+			//self.perk6back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk6back;
 			self.num_perks++;
 			if(print)
 			{
@@ -960,12 +975,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}
 		if(perk == "Ammo_Regen")
         {
-            self.perk7back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            //self.perk7back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
             self.perk7front = self drawshader( "menu_mp_lobby_icon_customgamemode", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk7front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk7front;
-			self.perk7back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk7back;
+			//self.perk7back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk7back;
 			self.num_perks++;
 			self thread ammoregen();
             self thread grenadesregen();
@@ -978,12 +993,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Dying_Wish")
         {
-            self.perk8back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
+            //self.perk8back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
             self.perk8front = self drawshader( "zombies_rank_5", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk8front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk8front;
-			self.perk8back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk8back;
+			//self.perk8back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk8back;
 			self.num_perks++;
             self thread dying_wish_checker();
 			if(print)
@@ -997,12 +1012,12 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "deadshot")
         {
-            self.perk9back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
+            //self.perk9back = self drawshader( "specialty_marathon_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
             self.perk9front = self drawshader( "killiconheadshot", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
             self.perk9front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk9front;
-			self.perk9back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk9back;
+			//self.perk9back.name = perk;
+            //self.perkarray[self.perkarray.size] = self.perk9back;
 			self.num_perks++;
 			self setclientfieldtoplayer( "deadshot_perk", 1 );
 			if(print)
@@ -1131,11 +1146,11 @@ dying_wish_checker()
     for(;;)
 	{
         self.dying_wish_on_cooldown = 0;
-        self.perk10back.alpha = 1;
-        self.perk10front.alpha = 1;
+        self.perk8back.alpha = 1;
+        self.perk8front.alpha = 1;
         self waittill("dying_wish_charge");
-        self.perk10back.alpha = 0.3;
-        self.perk10front.alpha = 0.4;
+        self.perk8back.alpha = 0.3;
+        self.perk8front.alpha = 0.4;
         self.dying_wish_uses++;
         self.dying_wish_on_cooldown = 1;
         delay = 300 + (self.dying_wish_uses * 30);
