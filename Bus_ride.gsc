@@ -116,10 +116,13 @@ init()
 	}
 }
 
-onplayerconnect()
+onPlayerConnect()
 {
-    level waittill("connected", player);
-    player thread onplayerspawned();
+    for(;;)
+    {
+        level waittill("connected", player);
+        player thread onPlayerSpawned();
+    }
 }
 
 onplayerspawned()
