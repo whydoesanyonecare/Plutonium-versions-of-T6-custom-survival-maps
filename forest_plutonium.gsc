@@ -132,13 +132,15 @@ init()
 		level.player_out_of_playable_area_monitor = 0;
 		level.perk_purchase_limit = 20;
 		level thread move_spawn_locations();
-		level thread stopbus(); 
 		level thread drawZombiesCounter();
 		level thread onPlayerConnect();
 		level thread custom_round_monitor();
+		level thread zombie_speed();
         //level thread night_mode(); ENABLE NIGHT MODE || Dying Wish Red Effect not working while enabled
 		level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
+		flag_wait( "start_zombie_round_logic" );
+		level thread maps/mp/zm_transit::delete_bus_pieces();
 
 	}
 	else
@@ -149,6 +151,25 @@ init()
         player iprintln( "^1Error! Please play in Green Run - Tranzit Normal Mode." );
 		setdvar( "ui_errorMessage", "^9Please use Green Run - Tranzit Normal Mode");
 	    setdvar( "ui_errorTitle", "^1Error" );
+	}
+}
+
+zombie_speed()
+{
+	speed = [];
+	speed[0] = "run";
+	speed[1] = "sprint";
+	while( level.round_number < 3 )
+	{
+		foreach(zombie in getaiarray(level.zombie_team))
+		{
+			if( !(IsDefined( zombie.run_set )) )
+			{
+				zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] ); 
+				zombie.run_set = 1;
+			}
+		}
+		wait 1;
 	}
 }
 
@@ -243,30 +264,6 @@ onPlayerSpawned()
 	}
 }
 
-stopbus()
-{
-	flag_wait( "initial_blackscreen_passed" );
-	level endon("end_game");
-	while( 1 )
-	{
-		bus = getent( "the_bus", "targetname" );
-		if( IsDefined( level.the_bus.ismoving ) && IsDefined( bus ) )
-		{
-			bus.disabled_by_emp = 1;
-			bus notify( "power_off" );
-			bus.pre_disabled_by_emp = 1;
-			bus notify( "pre_power_off" );
-			bus.ismoving = 0;
-			bus.isstopping = 0;
-			bus.exceed_chase_speed = 0;
-			bus notify( "stopping" );
-			bus.targetspeed = 0;
-		}
-		wait 2;
-	}
-
-}
-
 drawZombiesCounter()
 {
 	flag_wait( "initial_blackscreen_passed" );
@@ -356,7 +353,22 @@ SpawnPoint()
 	{
 		player[ 3] setorigin( ( 5270.08, 6896.83, -20.6077 ) );
 	}
-
+	if( player[ 4] == self )
+	{
+		player[ 4] setorigin( ( 5225.08, 6835.83, -20.6077 ) );
+	}
+	if( player[ 5] == self )
+	{
+		player[ 5] setorigin( ( 5200.08, 6830.83, -20.6077 ) );
+	}
+	if( player[ 6] == self )
+	{
+		player[ 6] setorigin( ( 5215.08, 6876.83, -20.6077 ) );
+	}
+	if( player[ 7] == self )
+	{
+		player[ 7] setorigin( ( 5230.08, 6856.83, -20.6077 ) );
+	}
 }
 
 init_custom_map()
@@ -424,7 +436,7 @@ buy_system( perk, sound, name, cost, type )
                         player.score -= cost;
                         player playsound( sound );
                         player thread DoGivePerk(perk);
-						wait 3;
+						wait 4;
                     	player.machine_is_in_use = 0;
 					}
 					if( type == "random" && !player.num_perks > 13 && player usebuttonpressed() && ( player.score >= cost ) && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
@@ -454,7 +466,7 @@ buy_system( perk, sound, name, cost, type )
                         gun = player maps/mp/zombies/_zm_weapons::get_upgrade_weapon( currgun, 0 );
                         player giveweapon(player maps/mp/zombies/_zm_weapons::get_upgrade_weapon( currgun, 0 ), 0, player custom_get_pack_a_punch_weapon_options(gun));
                         player switchToWeapon(gun);
-						playfx(loadfx( "maps/zombie/fx_zombie_packapunch"), ( 12865.8, -661, -175.5195 ), anglestoforward( ( 0, 180, 55  ) ) ); 
+						playfx(loadfx( "maps/zombie/fx_zombie_packapunch"), ( 5340.8, 7060, -14.2195 ), anglestoforward( ( 0, 90, 55  ) ) ); 
 						wait 3;
                     	player.machine_is_in_use = 0;
 					}
@@ -618,7 +630,6 @@ open_door( model, door_col )
 		}
 		wait 0.1;
 	}
-
 }
 
 default_vending_precaching()
@@ -744,7 +755,6 @@ custom_get_pack_a_punch_weapon_options( weapon )
 	}
 	self.pack_a_punch_weapon_options[weapon] = self calcweaponoptions( camo_index, lens_index, reticle_index, reticle_color_index );
 	return self.pack_a_punch_weapon_options[ weapon];
-
 }
 
 ww_points( player )
@@ -825,7 +835,7 @@ playerdamagelastcheck( einflictor, eattacker, idamage, idflags, smeansofdeath, s
 			maps\mp\_visionset_mgr::vsmgr_activate("overlay", "zm_ai_avogadro_electrified", self, 1, 1);
 			self shellshock( "electrocution", 1 );
 			self playsoundtoplayer( "zmb_avogadro_electrified", self );
-			if(level.round_number > 6)
+			if(level.round_number > 8)
 			{
 				self dodamage( 10, self.origin);
 			}
@@ -882,13 +892,11 @@ custom_round_monitor()
 					if(!isDefined(zombie.remodeled) && !zombie.is_avogadro)
 					{
 						zombie setModel( "c_zom_screecher_fb" );
-						zombie detachAll();
 						zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( "super_sprint" ); 
-                        zombie thread kill_crawler();
 						zombie thread last_zombie();
 					}
 				}
-				wait 0.05;
+				wait 0.1;
 			}
 			level.customround = level.round_number + randomintrange( 4, 6 );
             specific_powerup_drop("full_ammo", level.last_zombie_origin);
@@ -898,7 +906,17 @@ custom_round_monitor()
 
 last_zombie()
 {
-	self waittill( "death" );
+	wait 4;
+	while(isalive( self ))
+	{
+		if(!self.has_legs)
+		{
+			self doDamage(self.health + 666, (0, 0, 0));
+			break;
+		}
+		wait 1;
+	}
+	wait 0.1;
 	if ( get_current_zombie_count() == 0 && level.zombie_total == 0 )
 	{
 		level.last_zombie_origin = self.origin;
@@ -906,18 +924,6 @@ last_zombie()
 	clear_all_corpses();
 }
 
-kill_crawler()
-{
-	wait 5;
-	while(isalive( self ))
-	{
-		if(!self.has_legs)
-		{
-			self doDamage(self.health + 666, (0, 0, 0));
-		}
-		wait 0.5;
-	}
-}
 
 souls(box)
 {
@@ -995,7 +1001,6 @@ Custom_death_callback( einflictor, eattacker, idamage, idflags, smeansofdeath, s
 			}
 		}
 	}
-	return idamage;
 }
 
 doGivePerk(perk)
@@ -1095,7 +1100,7 @@ drawshader( shader, x, y, width, height, color, alpha, sort )
 drawshader_and_shadermove(perk, custom, print)
 {
 	y = 350;
-    x = -345 + (self.perk_count * 30);
+    x = -408 + (self.perk_count * 30);
     for(i = 0; i < self.perkarray.size; i++)
 	{
     	self.perkarray[i].x = self.perkarray[i].x + 30;
@@ -1997,7 +2002,6 @@ wallweapons( weapon, origin, angles, cost )
 {
 	wallweaponx = spawnentity( "script_model", getweaponmodel( weapon ), origin, angles + ( 0, 50, 0 ) );
 	wallweaponx thread wallweaponmonitorbox( weapon, cost );
-
 }
 
 wallweaponmonitorbox( weapon, cost )
