@@ -401,11 +401,8 @@ custom_round_monitor()
 				{
 					if(!isDefined(zombie.remodeled) && !zombie.is_avogadro)
 					{
-						clear_all_corpses();
 						zombie setModel( "c_zom_screecher_fb" );
-						zombie detachAll();
 						zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( "super_sprint" ); 
-						zombie thread kill_crawler();
 						zombie thread last_zombie();
 					}
 					if(distance( zombie.origin, (-4400, -8000, -62.875)) < 120)
@@ -439,24 +436,22 @@ custom_round_monitor()
 
 last_zombie()
 {
-	self waittill( "death" );
-	if ( get_current_zombie_count() == 0 && level.zombie_total == 0 )
-	{
-		level.last_zombie_origin = self.origin;
-	}
-}
-
-kill_crawler()
-{
-	wait 5;
+	wait 4;
 	while(isalive( self ))
 	{
 		if(!self.has_legs)
 		{
 			self doDamage(self.health + 666, (0, 0, 0));
+			break;
 		}
-		wait 0.5;
+		wait 1;
 	}
+	wait 0.1;
+	if ( get_current_zombie_count() == 0 && level.zombie_total == 0 )
+	{
+		level.last_zombie_origin = self.origin;
+	}
+	clear_all_corpses();
 }
 
 //--END-----CUSTOM_ROUNDS-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -706,7 +701,7 @@ perk_system( script, pos, model, angles, type, sound, name, cost, fx, perk, hint
 	}
 }
 
-drawshader(shader, align, relative, x, y, width, height, color, alpha, sort)
+drawshader_hud(shader, align, relative, x, y, width, height, color, alpha, sort)
 {
     element = newclienthudelem(self);
     element.elemtype = "bar";
@@ -750,7 +745,7 @@ background(name)
 	{
 		width = 390;
 	}
-	self thread drawshader("black", "CENTER", "TOP", 0, 275, width, 40, (0,0,0), 0.3, 1);
+	self thread drawshader_hud("black", "CENTER", "TOP", 0, 275, width, 40, (0,0,0), 0.3, 1);
 }
 
 buy_system( perk, sound, name, cost, type, hint )
