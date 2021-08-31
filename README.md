@@ -69,7 +69,7 @@ Custom rounds:
 
   - custom electric screecher rounds
 
-Controller aim assist:
+Controller aim assist: (latest Plutonium update changed how deadshot perk work and this aim assist is not working anymore)
 
   - Enable / Disable controller aim assist LB and RB
 
