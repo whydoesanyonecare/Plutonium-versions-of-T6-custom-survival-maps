@@ -618,7 +618,7 @@ buy_system( perk, sound, name, cost, type )
                         {
                             player thread DoGivePerk(perk);
                         }
-						wait 3;
+						wait 4;
                     	player.machine_is_in_use = 0;
 					}
                     if( type == "random" && !player.num_perks > 12 && player usebuttonpressed() && player can_buy_weapon() && ( player.score >= cost ) && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
@@ -628,7 +628,7 @@ buy_system( perk, sound, name, cost, type )
 						player.score -= cost;
 						player playsound ( "mus_perks_doubletap_sting" ); 
 						player thread give_random_perk();
-						wait 3;
+						wait 4;
 						player.machine_is_in_use = 0;
 					}
 					if(type == "random" && player.num_perks > 12 && player usebuttonpressed() && ( player.score >= cost ) )
