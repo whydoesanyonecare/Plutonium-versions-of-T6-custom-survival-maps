@@ -92,16 +92,11 @@ init()
 {
     if( getdvar( "mapname" ) == "zm_prison") 
 	{	
-	
-//###############################################################################################################################//
-
         level.map_location = "bridge"; //possible options "bridge" "rooftop"
 		level.challenge_mode = 0; //enable brutus challenge mode = 1 (afterlife limit 1)
 		level.pap_weapons_box = 0; //pack a punch weapons in box = 1 
 		level.custom_perks_enabled = 1; //custom perks enabled = 1
 		level.custom_power_ups = 1; //custom powerups enabled = 1
-
-//################################################################################################################################//
 		level.soulbox_active = 0;
 		level.soulbox1_active = 0;
 		level.soulbox2_active = 0;
