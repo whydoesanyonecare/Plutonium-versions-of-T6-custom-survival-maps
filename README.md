@@ -9,6 +9,41 @@ Custom perk icons are only in correct spot while using 1080p or 720p. in other r
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+MAPS: Rooftop/Bridge - Custom Survival Maps - Mob of The Dead [No map rotation]
+
+These maps use Mob of The Dead
+
+Brutus challenge can be enabled in the file. This will spawn +1 brutus every round.
+
+Bridge Challenges:
+
+- get 50 headshots
+- fill 3 soul box
+- kill all brutus
+- find and shoot 5 skulls
+
+Custom powerups:
+
+- Death Machine
+- Pack a Punch Weapons in box
+- Unlimited ammo
+- Zombie Cash
+
+5 Custom Perks:
+
+- Ethereal Razor
+- PhD Flopper
+- Mule kick
+- Ammo regen
+- Dying wish
+
+Blundergat will be added to mystery box round 15
+
+Added ability to share weapons with team from mysterybox.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 MAP The Bus: >> map may have bugs please report any you find.
 
 This map uses TranZit
