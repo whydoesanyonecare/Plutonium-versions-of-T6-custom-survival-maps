@@ -331,11 +331,6 @@ remove()
     doorstrigger = getentarray( "bus_door_trigger", "targetname" );
 	doorstrigger[0] delete();
 	doorstrigger[1] delete();
-    driver = getent( "bus_driver_head", "targetname" );
-	if ( isDefined( driver ) )
-	{
-		driver delete();
-	}
 }
 
 timer()
