@@ -181,6 +181,7 @@ teleport_avogadro()
 	flag_wait( "initial_blackscreen_passed" );
 	for(;;)
 	{	
+		level.timesplayerattackingautomaton = 0;
 		foreach(zombie in getAiArray(level.zombie_team))
 		{
 			if( isDefined( zombie.is_avogadro ) && zombie.is_avogadro )
@@ -1521,9 +1522,9 @@ bus_tele()
 {
     flag_wait( "initial_blackscreen_passed" );
     wait 5;
-    tele = spawn("trigger_radius", level.the_bus.origin, 0, 35, 40);
+    tele = spawn("trigger_radius", level.automaton.origin, 0, 35, 40);
     tele enablelinkto();
-    tele linkto( level.the_bus );
+    tele linkto( level.automaton );
 	tele.targetname = "teleport_to_safe_area_trigger";
 	tele SetCursorHint("HINT_NOICON");
 	tele SetHintString("Press ^3&&1^7 to teleport safe area for 60 seconds [Cost: 5000]");
