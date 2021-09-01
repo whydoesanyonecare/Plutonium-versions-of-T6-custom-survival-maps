@@ -168,7 +168,6 @@ lag_failsafe()
 		if(distance((10180, 8716, 970), self.origin) > 400 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
 		{
 			self setorigin((level.the_bus.origin + (x,y,20)));
-			iprintln("teleported");
 		}
 		wait .1;
 	}
