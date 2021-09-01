@@ -95,6 +95,8 @@ init()
         remove();
         setdvar("r_fog", "0");
         setDvar( "scr_screecher_ignore_player", 1 );
+	setdvar( "ui_errorMessage", "^9Thank you for playing this Custom Survival Map");
+	setdvar( "ui_errorTitle", "^1Bus" );
         level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
         //level.the_bus.skip_next_destination = 1; //nonstop bus ride
@@ -165,7 +167,7 @@ lag_failsafe()
     y = randomfloatrange(10, 40);
 	for(;;)
 	{
-		if(distance((10180, 8716, 970), self.origin) > 400 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
+		if(distance((10180, 8716, 970), self.origin) > 500 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
 		{
 			self setorigin((level.the_bus.origin + (x,y,20)));
 		}
