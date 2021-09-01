@@ -145,7 +145,7 @@ init()
 		{
 			precachemodel(model);
 		}
-		precacheshaders = array("menu_mp_lobby_icon_customgamemode","specialty_divetonuke_zombies","zombies_rank_1","zombies_rank_3","zombies_rank_2","zombies_rank_4","zombies_rank_5","menu_lobby_icon_facebook","menu_mp_weapons_1911","hud_icon_colt","waypoint_revive","hud_grenadeicon","damage_feedback","menu_lobby_icon_twitter","specialty_doubletap_zombies");
+		precacheshaders = array("specialty_additionalprimaryweapon_zombies","menu_mp_lobby_icon_customgamemode","specialty_divetonuke_zombies","zombies_rank_1","zombies_rank_3","zombies_rank_2","zombies_rank_4","zombies_rank_5","menu_lobby_icon_facebook","menu_mp_weapons_1911","hud_icon_colt","waypoint_revive","hud_grenadeicon","damage_feedback","menu_lobby_icon_twitter","specialty_doubletap_zombies");
 		foreach(shader in precacheshaders)
 		{
 			precacheshader(shader);
@@ -873,12 +873,9 @@ drawshader_and_shadermove(perk, custom, print)
 	}
         if(perk == "MULE")
         {   
-            self.perk1back = self drawshader( "specialty_doubletap_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk1front = self drawshader( "menu_mp_weapons_1911", x, 350, 22, 22, ( 0, 1, 0 ), 100, 0 );
+            self.perk1front = self drawshader( "specialty_additionalprimaryweapon_zombies", x, 350, 24, 24, ( 0, 1, 0 ), 100, 0 );
             self.perk1front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk1front;
-			self.perk1back.name = perk;
-            self.perkarray[self.perkarray.size] = self.perk1back;
 			self.num_perks++;
 			if(print)
 			{
