@@ -78,29 +78,32 @@ init()
 		{
 			precacheshader(shader);
 		}
+		level.challenge_headshots = 0;
         level.player_out_of_playable_area_monitor = 0;
         level.perk_purchase_limit = 20;
         level.custom_vending_precaching = ::default_vending_precaching;
         level.get_player_weapon_limit = ::custom_get_player_weapon_limit;
         level.zombie_last_stand = ::LastStand;
         register_player_damage_callback( ::playerdamagelastcheck );
+		register_zombie_death_event_callback( ::Custom_death_callback );
         level.effect_WebFX = loadfx("misc/fx_zombie_powerup_solo_grab");
         level._effect[ "screecher_vortex" ] = loadfx( "maps/zombie/fx_zmb_screecher_vortex" );
         safe_area();
 		level thread onPlayerConnect();
 		level thread drawZombiesCounter();
         level thread teleport_avogadro();
+		level thread upgrade_bus();
+		level thread zombie_fail_safe(); //untested
+		level thread bus_tele();
+		level thread powerups();
         level maps\mp\zombies\_zm_game_module::turn_power_on_and_open_doors();
         box_init();
         remove();
         setdvar("r_fog", "0");
         setDvar( "scr_screecher_ignore_player", 1 );
-	setdvar( "ui_errorMessage", "^9Thank you for playing this Custom Survival Map");
-	setdvar( "ui_errorTitle", "^1Bus" );
         level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
         //level.the_bus.skip_next_destination = 1; //nonstop bus ride
-        level thread bus_tele();
         level.power_up = [];
 		level.power_up[0] = "nuke";
 		level.power_up[1] = "insta_kill";
@@ -158,6 +161,76 @@ onplayerspawned()
             self.score = 5000;
         }
     }
+}
+
+zombie_fail_safe()
+{
+	flag_wait( "initial_blackscreen_passed" );
+	flag_wait( "spawn_zombies" );
+	for(;;)
+	{
+		foreach(zombie in getaiarray(level.zombie_team))
+		{
+			if(!zombie.done)
+			{
+				zombie thread monitor_life();
+				zombie.done = 1;
+			}
+		}
+		wait 1;
+	}
+}
+
+monitor_life()
+{
+	wait 5;
+	for(i=0;i<180;i++)
+	{
+		if(!isalive(self))
+		{
+			break;
+		}
+		wait 1;
+	}
+	self dodamage(self.health + 666,(0,0,0));
+	self delete();
+}
+
+powerups()
+{
+	flag_wait( "initial_blackscreen_passed" );
+	for(;;)
+	{
+		level waittill("powerup_dropped");
+		i = 0;
+		while(i < level.active_powerups.size)
+		{
+			if(level.active_powerups[i] != level.safe_powerup && level.active_powerups[i].origin != level.the_bus.origin + (0,0,70))
+			{
+				level.active_powerups[i] enablelinkto();
+				level.active_powerups[i] linkto( level.the_bus, "", level.the_bus worldtolocalcoords( level.the_bus.origin + (0,0,70)), level.the_bus.angles );
+			}	
+			i++;
+		}
+		wait 0.1;
+	}
+}
+
+upgrade_bus()
+{
+	flag_wait( "initial_blackscreen_passed" );
+	while(1)
+	{
+		if(level.challenge_headshots == 100)
+		{
+			iprintln("^1Cow Catcher ^7added to bus.")
+			flag_set( "catcher_attached" );
+			level.the_bus showpart( "tag_plow_attach" );
+			level.the_bus.upgrades[ "Plow" ].installed = 1;
+			break;
+		}
+		wait 1;
+	}
 }
 
 lag_failsafe()
@@ -220,7 +293,7 @@ portal()
 drawZombiesCounter()
 {
 	flag_wait( "initial_blackscreen_passed" );
-    thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
+	thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
     level.zombiesCounter = createServerFontString("hudsmall" , 1.9);
     level.zombiesCounter setPoint("RIGHT", "TOP", 315, "RIGHT");
     while(true)
@@ -1593,18 +1666,29 @@ spawn_infinite_powerup_drop( v_origin, str_type )
 	level._powerup_timeout_override = ::infinite;
 	if ( isDefined( str_type ) )
 	{
-		intro_powerup = maps/mp/zombies/_zm_powerups::specific_powerup_drop( str_type, v_origin );
+		level.safe_powerup = maps/mp/zombies/_zm_powerups::specific_powerup_drop( str_type, v_origin );
 	}
 	else
 	{
-		intro_powerup = maps/mp/zombies/_zm_powerups::powerup_drop( v_origin );
+		level.safe_powerup = maps/mp/zombies/_zm_powerups::powerup_drop( v_origin );
 	}
 	level._powerup_timeout_override = undefined;
     wait 60;
-    intro_powerup delete();
+    level.safe_powerup delete();
     thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
 }
 
 infinite()
 {
+}
+
+Custom_death_callback( einflictor, eattacker, idamage, idflags, smeansofdeath, sweapon, vpoint, vdir, shitloc, psoffsettime, boneindex ) 
+{
+	if ( isDefined( self ) && isDefined( self.damagelocation ) && isDefined( self.damagemod ) && isDefined( self.damageweapon ) && isDefined( self.attacker ) && isplayer( self.attacker ) )
+	{
+		if ( is_headshot( self.damageweapon, self.damagelocation, self.damagemod ) )
+		{
+			level.challenge_headshots++;
+		}
+	}
 }
