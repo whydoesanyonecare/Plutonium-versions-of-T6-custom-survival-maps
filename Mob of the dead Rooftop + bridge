@@ -1,7 +1,5 @@
 //bridge/roof
 
-//you can change map by changing level.map_location in line 97.
-
 //working on resolutions 720p and 1080p
 
 //TODO:: add map rotation
@@ -94,11 +92,11 @@ init()
 {
     if( getdvar( "mapname" ) == "zm_prison") 
 	{	
-        level.map_location = "bridge"; //possible options "bridge" "rooftop"
-		level.challenge_mode = 0; //enable brutus challenge mode = 1 (afterlife limit 1)
-		level.pap_weapons_box = 0; //pack a punch weapons in box = 1 (while 0 pap_box powerup will be added round 15)
-		level.custom_perks_enabled = 1; //custom perks enabled = 1
-		level.custom_power_ups = 1; //custom powerups enabled = 1
+		level.map_set = getDvarIntDefault("Map_location", 0); //map locations (0 = rooftop) (1 = Bridge)
+		level.challenge_mode = getDvarIntDefault("Brutus_Mode", 0); //Brutus challenge mode enabled = 1
+		level.pap_weapons_box = getDvarIntDefault("Pap_box", 0); //pack a punch weapons in box = 1  (while 0 pap_box powerup will be added round 15)
+		level.custom_perks_enabled = getDvarIntDefault("Custom_perks", 1); //custom perks enabled = 1
+		level.custom_power_ups = getDvarIntDefault("Custom_powerups", 1); //custom powerups enabled = 1
 		level.soulbox_active = 0;
 		level.soulbox1_active = 0;
 		level.soulbox2_active = 0;
@@ -106,6 +104,14 @@ init()
 		level.tomahawk_challenge = 0;
 		level.perk_machine_challenge = 0;
 		level.challenge_ended = 0;
+		if(is_true(level.map_set))
+		{
+			level.map_location = "bridge";
+		}
+		else
+		{
+			level.map_location = "rooftop";
+		}
 		register_zombie_death_event_callback( ::Custom_death_callback );
         if(isDefined(level.player_damage_callbacks[0]))
 	    {
@@ -163,7 +169,10 @@ init()
 		if(level.map_location == "bridge")
 		{
 			thread tomahawk_challenge();
-			thread perk_machine_challenge();
+			if(level.custom_perks_enabled)
+			{
+				thread perk_machine_challenge();
+			}
 		}
 	}
 }
@@ -212,10 +221,6 @@ brutus_challenge()
 	level.zombie_vars["zombie_spawn_delay"] = 0.1;
 	level.zombie_vars["zombie_intermission_time"] = 0.1;
     flag_wait( "initial_blackscreen_passed" );
-    foreach(player in level.players)
-    {
-        player.score = 1500; 
-    }
 	timer();
 	level thread brutus_spawn_check();
 }
@@ -396,10 +401,21 @@ onPlayerSpawned()
 	self thread damagehitmarker();
     self SpawnPoint();
     self init_wall_fx();
+	if( level.challenge_mode )
+    {
+		self.score = 1500;
+	}
 	for(;;)
 	{
 		self waittill( "spawned_player" );
 		self thread SpawnPoint();
+		if( level.challenge_mode )
+    	{
+			if(self.score < 1500)
+			{
+				self.score = 1500;
+			}
+		}
     }
 }
 
@@ -580,6 +596,11 @@ SpawnPoint()
 	}
 }
 
+perk_fx( fx )
+{
+	playfxontag( level._effect[ fx ], self, "tag_origin" );
+}
+
 init_custom_map()
 {
 	if(level.map_location == "bridge")
@@ -590,9 +611,9 @@ init_custom_map()
     	perk_system( "script_model", ( -470.28, -3318, -8447.88), "p6_zm_al_vending_jugg_on", ( 0, 0, 0 ), "original", "mus_perks_jugganog_sting", "Jugger-Nog", 2500, "jugger_light", "specialty_armorvest" );
     	perk_system( "script_model", ( -367, -3910, -8447.88  ), "p6_zm_al_vending_sleight_on", ( 0, -90, 0 ), "original", "mus_perks_speed_sting", "Speed Cola", 3000, "sleight_light", "specialty_fastreload" );
     	perk_system( "script_model", ( -1525.8, -3685, -8447.88 ), "p6_zm_al_vending_doubletap2_on", ( 0, 180, 0 ), "original", "mus_perks_doubletap_sting", "Double Tap Root Beer", 2000, "doubletap_light", "specialty_rof" );
-    	perk_system( "script_model", ( -1640, -3887, -8447.88 ), "p6_zm_al_vending_ads_on", ( 0, 180, 0 ), "original", "mus_perks_jugganog_sting", "Deadshot", 1500, "jugger_light", "specialty_deadshot" );
+    	perk_system( "script_model", ( -1640, -3887, -8447.88 ), "p6_zm_al_vending_ads_on", ( 0, 180, 0 ), "original", "mus_perks_jugganog_sting", "Deadshot", 1500, "deadshot_light", "specialty_deadshot" );
 		perk_system( "script_model", ( -1256.28, -3215, -8447.88 ), "p6_zm_al_vending_nuke_on", ( 0, 0, 0 ), "custom", "mus_perks_jugganog_sting", "PhD Flopper", 2000, "jugger_light", "PHD_FLOPPER" );
-    	perk_system( "script_model", ( -714, -3643, -8447.88 ), "p6_zm_al_vending_three_gun_on", ( 0, 0, 0 ), "custom", "mus_perks_stamin_sting", "Mule Kick", 4000, "doubletap_light", "MULE" );
+    	perk_system( "script_model", ( -714, -3643, -8447.88 ), "p6_zm_al_vending_three_gun_on", ( 0, 0, 0 ), "custom", "mus_perks_stamin_sting", "Mule Kick", 4000, "additionalprimaryweapon_light", "MULE" );
     	perk_system( "script_model", ( -919.2, -3932.697, -8447.875), "p6_zm_vending_electric_cherry_on", ( 0, 180, 0 ), "original", "mus_perks_jugganog_sting", "Electric Cherry", 2500, "jugger_light", "specialty_grenadepulldeath" );
 		if(level.custom_perks_enabled)
 		{
@@ -873,7 +894,7 @@ drawshader_and_shadermove(perk, custom, print)
 	}
         if(perk == "MULE")
         {   
-            self.perk1front = self drawshader( "specialty_additionalprimaryweapon_zombies", x, 350, 24, 24, ( 0, 1, 0 ), 100, 0 );
+            self.perk1front = self drawshader( "specialty_additionalprimaryweapon_zombies", x, 350, 24, 24, ( 1, 1, 1 ), 100, 0 );
             self.perk1front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk1front;
 			self.num_perks++;
@@ -1023,7 +1044,7 @@ start_er()
 					{
 						zombie doDamage(zombie.health + 666, (0, 0, 0));
 					}
-                    zombie dodamage(500, (0, 0, 0));
+                    zombie dodamage(600, (0, 0, 0));
                     if(zombie.health <= 0)
 					{
                         self maps/mp/zombies/_zm_score::add_to_player_score( 100 );
@@ -2623,7 +2644,7 @@ killed()
 	while(1)
 	{
 		iprintln("spawner");
-		self waittill("bring_bridge_brutuses_back");
+		level waittill("bring_bridge_brutuses_back");
 		while ( i < zombies.size )
 		{
 			if ( isDefined( zombies[ i ].is_brutus ) && zombies[ i ].is_brutus )
