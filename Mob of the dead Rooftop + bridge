@@ -92,7 +92,7 @@ init()
 {
     if( getdvar( "mapname" ) == "zm_prison") 
 	{
-		level.Rotation = getDvarIntDefault("Map_rotation", 0); //map rotation enabled = 1
+		level.Rotation = getDvarIntDefault("Map_rotation", 1); //map rotation enabled = 1
 		level.map_set = getDvarIntDefault("Map_location", 0); //map locations (0 = rooftop) (1 = Bridge)
 		level.challenge_mode = getDvarIntDefault("Brutus_Mode", 0); //Brutus challenge mode enabled = 1
 		level.pap_weapons_box = getDvarIntDefault("Pap_box", 0); //pack a punch weapons in box = 1  (while 0 pap_box powerup will be added round 15 if custom powerups are enabled)
@@ -107,7 +107,7 @@ init()
 		level.challenge_ended = 0;
 		if(!level.rotation)
 		{
-			if(is_true(level.map_set))
+			if(!is_true(level.map_set))
 			{
 				level.map_location = "bridge";
 			}
