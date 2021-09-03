@@ -91,10 +91,11 @@
 init()
 {
     if( getdvar( "mapname" ) == "zm_prison") 
-	{	
+	{
+		level.Rotation = getDvarIntDefault("Map_rotation", 0); //map rotation enabled = 1
 		level.map_set = getDvarIntDefault("Map_location", 0); //map locations (0 = rooftop) (1 = Bridge)
 		level.challenge_mode = getDvarIntDefault("Brutus_Mode", 0); //Brutus challenge mode enabled = 1
-		level.pap_weapons_box = getDvarIntDefault("Pap_box", 0); //pack a punch weapons in box = 1  (while 0 pap_box powerup will be added round 15)
+		level.pap_weapons_box = getDvarIntDefault("Pap_box", 0); //pack a punch weapons in box = 1  (while 0 pap_box powerup will be added round 15 if custom powerups are enabled)
 		level.custom_perks_enabled = getDvarIntDefault("Custom_perks", 1); //custom perks enabled = 1
 		level.custom_power_ups = getDvarIntDefault("Custom_powerups", 1); //custom powerups enabled = 1
 		level.soulbox_active = 0;
@@ -104,13 +105,21 @@ init()
 		level.tomahawk_challenge = 0;
 		level.perk_machine_challenge = 0;
 		level.challenge_ended = 0;
-		if(is_true(level.map_set))
+		if(!level.rotation)
 		{
-			level.map_location = "bridge";
+			if(is_true(level.map_set))
+			{
+				level.map_location = "bridge";
+			}
+			else
+			{
+				level.map_location = "rooftop";
+			}
 		}
 		else
 		{
-			level.map_location = "rooftop";
+			map_rotation();
+			level.map_location = getDvar( "customMap" );
 		}
 		register_zombie_death_event_callback( ::Custom_death_callback );
         if(isDefined(level.player_damage_callbacks[0]))
@@ -1250,6 +1259,7 @@ box_init()
 {
 	setdvar( "magic_chest_movable", "0" );
 	flag_wait( "initial_blackscreen_passed" );
+	add_zombie_hint( "default_shared_box", "^1Any player: ^7Hold ^3&&1^7 for weapon");
 	if ( !isDefined( level.magic_box_zbarrier_state_func ) )
 	{
 		level.magic_box_zbarrier_state_func = ::process_magic_box_zbarrier_state;
@@ -1405,7 +1415,6 @@ boxtrigger_update_prompt( player )
 boxstub_update_prompt( player )
 {
 	self setcursorhint( "HINT_NOICON" );
-	level.box_hint delete();
 	if ( !self trigger_visible_to_player( player ) )
 	{
 		return 0;
@@ -1415,29 +1424,17 @@ boxstub_update_prompt( player )
 	{
 		if(level.shared_box)
 		{
-			if(level.map_location == "rooftop")
-			{
-				level.box_hint = spawn("trigger_radius", ( 2249, 9819.5, 1704.1 ) + (0,0,32), 0, 35, 70);
-			}
-			if(level.map_location == "bridge")
-			{
-				level.box_hint = spawn("trigger_radius", ( -437, -3658, -8447.88 ) + (0,0,32), 0, 35, 70);
-			}
-			level.box_hint.targetname = "box_shared";
-			level.box_hint.angles = (0, 90, 0);
-			level.box_hint SetCursorHint("HINT_NOICON");
-			level.box_hint SetHintString("^1Any player: ^7Hold ^3&&1^7 for weapon");
-			level.box_hint setvisibletoall();
+			self.hint_string = get_hint_string( self, "default_shared_box" );
 		}
 		else
 		{
 			if ( isDefined( level.magic_box_check_equipment ) && [[ level.magic_box_check_equipment ]]( self.stub.trigger_target.grab_weapon_name ) )
 			{
-				self.hint_string = "Hold ^3&&1^7 for Equipment ^1or ^7Press ^3[{+melee}]^7 to let teammates to pick it up";
+				self.hint_string = "Hold ^3&&1^7 for Equipment ^1or ^7Press ^3[{+melee}]^7 to let teammates pick it up";
 			}
 			else
 			{
-				self.hint_string = "Hold ^3&&1^7 for Weapon ^1or ^7Press ^3[{+melee}]^7 to let teammates to pick it up";
+				self.hint_string = "Hold ^3&&1^7 for Weapon ^1or ^7Press ^3[{+melee}]^7 to let teammates pick it up";
 			}
 		}
 	}
@@ -1622,7 +1619,7 @@ treasure_chest_think()
 			if(user meleeButtonPressed() && isplayer( user ) && distance(self.origin, user.origin) <= 70)
 			{
 				level.shared_box = 1;
-				self.unitrigger_stub.prompt_and_visibility_func = ::boxtrigger_update_prompt;
+				self.unitrigger_stub run_visibility_function_for_all_triggers();
 				for( a=i;a<105;a++ )
 				{
 					foreach(player in level.players)
@@ -1700,7 +1697,6 @@ treasure_chest_think()
 	self._box_open = 0;
 	level.box_open = 0;
 	level.shared_box = 0;
-	level.box_hint delete();
 	self._box_opened_by_fire_sale = 0;
 	self.chest_user = undefined;
 	self notify( "chest_accessed" );
@@ -2832,4 +2828,22 @@ shotables(skull_number)
         wait 0.3;
     }
 	level.skulls destroy();
+}
+
+map_rotation() //modified custom function taken from bonusmaps code [Thanks to Cahz, GerardS0406 and JezuzLizard who made the function in first place]
+{
+	level.mapList = strTok( level.customMapRotation, " " );
+	level.customMapRotation = "bridge rooftop";
+	level.nextMap = RandomInt( level.mapList.size );
+	level.lastMap = getDvar( "lastMap" );
+	if( level.map_location == level.mapList[ level.nextMap ] || level.mapList[ level.nextMap ] == level.lastMap )
+	{
+		return map_rotation();
+	}
+	else
+	{
+		setDvar( "lastMap", level.mapList[ level.nextMap ] );
+		setDvar( "customMap", level.mapList[ level.nextMap ] );
+		return;
+	}
 }
