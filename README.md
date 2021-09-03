@@ -13,7 +13,17 @@ MAPS: Rooftop/Bridge - Custom Survival Maps - Mob of The Dead [No map rotation]
 
 These maps use Mob of The Dead
 
-Brutus challenge can be enabled in the file. This will spawn +1 brutus every round.
+Added Map Rotation which changes location every time map start. This is enabled by default. type in console set map_rotation 0 to disable map rotation.
+
+If map rotation is disabled the map location can be changed by typing in console set map_location 1 or set map_location 0 (0 = Bridge which is default) and (1 = Rooftop).
+
+Brutus challenge can be enabled in console with set brutus_mode 1 which is by default 0. This will spawn +1 brutus every round.
+
+Added command for pack a punch weapons in box set pap_box 1 type this in console to enable it. By default this is 0 and pap_box custom powerup will be added in round 15 if custom powerups are enabled.
+
+Added ability to remove Custom Perk Machine with set custom_perks 0 in console which is by default 1.
+
+Also added ability to disable custom powerups set custom_powerups 0 in console which is by default 1.
 
 Bridge Challenges:
 
