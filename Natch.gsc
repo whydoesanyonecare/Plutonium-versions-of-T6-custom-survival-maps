@@ -179,7 +179,7 @@ move_spawners()
 		if(level.openeddoor)
 		{
 			level.zombie_spawn_locations[0].origin = (13238, -828, -217.9);
-			level.zombie_spawn_locations[1].origin = (12207, -16, -197.3);
+			level.zombie_spawn_locations[1].origin = (13207, -16, -197.3);
 			level.zombie_spawn_locations[2].origin = (13321, -382, -202.86);
 			level.zombie_spawn_locations[9].origin = (13213, -993, -216);
 			level.zombie_spawn_locations[12].origin = (13444, 18, -180);
