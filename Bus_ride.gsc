@@ -78,6 +78,12 @@ init()
 		{
 			precacheshader(shader);
 		}
+
+		if(isDefined(level._zombiemode_powerup_grab))
+		{
+			level.original_zombiemode_powerup_grab = level._zombiemode_powerup_grab;
+		}
+		level._zombiemode_powerup_grab = ::custom_powerup_grab;
 		level.challenge_headshots = 0;
         level.player_out_of_playable_area_monitor = 0;
         level.perk_purchase_limit = 20;
@@ -199,8 +205,18 @@ monitor_life()
 powerups()
 {
 	flag_wait( "initial_blackscreen_passed" );
+	include_zombie_powerup("zombie_cash");
+	add_zombie_powerup("zombie_cash", "zombie_z_money_icon", &"ZOMBIE_POWERUP_ZOMBIE_CASH", ::func_should_always_drop, 0, 0, 0); 
+	powerup_set_can_pick_up_in_last_stand("zombie_cash", 1);
 	for(;;)
 	{
+		if(level.round_number == 5 && !powerup_added)
+		{
+			include_zombie_powerup("random_perk");
+   	    	add_zombie_powerup("random_perk", "t6_wpn_zmb_perk_bottle_sleight_world", &"ZOMBIE_POWERUP_RANDOM_PERK", ::func_should_always_drop, 0, 0, 0); 
+	    	powerup_set_can_pick_up_in_last_stand("random_perk", 1);
+			powerup_added = 1;
+		}
 		level waittill("powerup_dropped");
 		i = 0;
 		while(i < level.active_powerups.size)
@@ -688,9 +704,9 @@ buy_system( perk, sound, name, cost, type )
         {
             if(!player.machine_is_in_use)
 			{
-                if( distance( self.origin, player.origin ) <= 70 )
+                if( distance( self.origin, player.origin ) <= 60 )
                 {
-			    	player thread SpawnHint( self.origin, 45, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
+			    	player thread SpawnHint( self.origin, 35, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
                     
 					if(type != "random" && type != "pap" && player usebuttonpressed() && !player hascustomperk(perk) && !player hasperk(perk) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
                     {
@@ -1691,4 +1707,67 @@ Custom_death_callback( einflictor, eattacker, idamage, idflags, smeansofdeath, s
 			level.challenge_headshots++;
 		}
 	}
+}
+
+custom_powerup_grab(s_powerup, e_player)
+{
+	if (s_powerup.powerup_name == "zombie_cash")
+	{
+        foreach( player in level.players )
+        {
+    		player thread power_up_hud("Zombie Cash!" );
+            player.score += (100 * randomIntRange(-5, 21));
+            if(player.score < 0)
+			{
+                player.score = 0;
+            }
+        }
+    }
+	if (s_powerup.powerup_name == "random_perk")
+	{
+	    foreach(player in level.players)
+	    {
+			player thread power_up_hud("Free Perk!" );
+		    player thread give_random_perk();
+		    player.score += 500;
+	    }
+	}
+	else if (isDefined(level.original_zombiemode_powerup_grab))
+		level thread [[level.original_zombiemode_powerup_grab]](s_powerup, e_player);
+}
+
+power_up_hud(text)
+{
+	self endon("disconnect");
+	power_up_hud_string = newclienthudelem(self);
+	power_up_hud_string.elemtype = "font";
+	power_up_hud_string.font = "objective";
+	power_up_hud_string.fontscale = 2;
+	power_up_hud_string.x = 0;
+	power_up_hud_string.y = 0;
+	power_up_hud_string.width = 0;
+	power_up_hud_string.height = int( level.fontheight * 2 );
+	power_up_hud_string.xoffset = 0;
+	power_up_hud_string.yoffset = 0;
+	power_up_hud_string.children = [];
+	power_up_hud_string setparent(level.uiparent);
+	power_up_hud_string.hidden = 0;
+	power_up_hud_string maps/mp/gametypes_zm/_hud_util::setpoint("TOP", undefined, 0, level.zombie_vars["zombie_timer_offset"] - (level.zombie_vars["zombie_timer_offset_interval"] * 2));
+	power_up_hud_string.sort = .5;
+	power_up_hud_string.alpha = 0;
+	power_up_hud_string fadeovertime(.5);
+	power_up_hud_string.alpha = 1;
+	power_up_hud_string setText(text);
+	power_up_hud_string thread string_move();
+}
+
+string_move()
+{
+	wait .5;
+	self fadeovertime(1.5);
+	self moveovertime(1.5);
+	self.y = 270;
+	self.alpha = 0;
+	wait 1.5;
+	self destroy();
 }
