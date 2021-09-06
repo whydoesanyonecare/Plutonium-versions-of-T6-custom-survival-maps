@@ -210,7 +210,7 @@ powerups()
 	powerup_set_can_pick_up_in_last_stand("zombie_cash", 1);
 	for(;;)
 	{
-		if(level.round_number == 5 && !powerup_added)
+		if(level.round_number > 5 && !powerup_added)
 		{
 			include_zombie_powerup("random_perk");
    	    	add_zombie_powerup("random_perk", "t6_wpn_zmb_perk_bottle_sleight_world", &"ZOMBIE_POWERUP_RANDOM_PERK", ::func_should_always_drop, 0, 0, 0); 
