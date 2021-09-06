@@ -90,7 +90,7 @@ init()
 {
     if( getdvar( "mapname" ) == "zm_prison") 
 	{
-		level.Rotation = getDvarIntDefault("Map_rotation", 1); //map rotation enabled = 1
+		level.Rotation = getDvarIntDefault("Map_rotation", 1); //map rotation enabled = 1 (this will change map location everytime map start)
 		level.map_set = getDvarIntDefault("Map_location", 0); //map locations (1 = rooftop) (0 = Bridge)
 		level.challenge_mode = getDvarIntDefault("Brutus_Mode", 0); //Brutus challenge mode enabled = 1
 		level.pap_weapons_box = getDvarIntDefault("Pap_box", 0); //pack a punch weapons in box = 1  (while 0 pap_box powerup will be added round 15 if custom powerups are enabled)
@@ -1257,7 +1257,7 @@ box_init()
 {
 	setdvar( "magic_chest_movable", "0" );
 	flag_wait( "initial_blackscreen_passed" );
-	add_zombie_hint( "default_shared_box", "^1Any player: ^7Hold ^3&&1^7 for weapon");
+	add_zombie_hint( "default_shared_box", "Hold ^3&&1^7 for weapon");
 	if ( !isDefined( level.magic_box_zbarrier_state_func ) )
 	{
 		level.magic_box_zbarrier_state_func = ::process_magic_box_zbarrier_state;
@@ -1413,8 +1413,14 @@ boxtrigger_update_prompt( player )
 boxstub_update_prompt( player )
 {
 	self setcursorhint( "HINT_NOICON" );
-	if ( !self trigger_visible_to_player( player ) )
+	if(!self trigger_visible_to_player( player ))
 	{
+		if(level.shared_box)
+		{
+			self setinvisibletoplayer( player );
+			self.hint_string = get_hint_string( self, "default_shared_box" );
+			return 1;
+		}
 		return 0;
 	}
 	self.hint_parm1 = undefined;
@@ -1423,14 +1429,14 @@ boxstub_update_prompt( player )
 		if(level.shared_box)
 		{
 			self.hint_string = get_hint_string( self, "default_shared_box" );
-		}
+		}	
 		else
 		{
-			if ( isDefined( level.magic_box_check_equipment ) && [[ level.magic_box_check_equipment ]]( self.stub.trigger_target.grab_weapon_name ) )
+			if (isDefined( level.magic_box_check_equipment ) && [[ level.magic_box_check_equipment ]]( self.stub.trigger_target.grab_weapon_name ) )
 			{
 				self.hint_string = "Hold ^3&&1^7 for Equipment ^1or ^7Press ^3[{+melee}]^7 to let teammates pick it up";
 			}
-			else
+			else 
 			{
 				self.hint_string = "Hold ^3&&1^7 for Weapon ^1or ^7Press ^3[{+melee}]^7 to let teammates pick it up";
 			}
@@ -1616,6 +1622,7 @@ treasure_chest_think()
 		{
 			if(user meleeButtonPressed() && isplayer( user ) && distance(self.origin, user.origin) <= 70)
 			{
+				level.magic_box_grab_by_anyone = 1;
 				level.shared_box = 1;
 				self.unitrigger_stub run_visibility_function_for_all_triggers();
 				for( a=i;a<105;a++ )
@@ -1695,6 +1702,7 @@ treasure_chest_think()
 	self._box_open = 0;
 	level.box_open = 0;
 	level.shared_box = 0;
+	level.magic_box_grab_by_anyone = 0;
 	self._box_opened_by_fire_sale = 0;
 	self.chest_user = undefined;
 	self notify( "chest_accessed" );
@@ -2284,7 +2292,7 @@ shield_bench(origin, angles)
 	trigger SetCursorHint("HINT_NOICON");
 	if(level.map_location == "bridge")
 	{
-		trigger SetHintString("Complete Shield challenge Frist.");
+		trigger SetHintString("Complete Shield challenge First.");
 		thread shield_challenge();
 		level waittill("shield_challenge_completed");
 	}
