@@ -1417,7 +1417,7 @@ boxstub_update_prompt( player )
 	{
 		if(level.shared_box)
 		{
-			self setinvisibletoplayer( player );
+			self setvisibletoplayer( player );
 			self.hint_string = get_hint_string( self, "default_shared_box" );
 			return 1;
 		}
