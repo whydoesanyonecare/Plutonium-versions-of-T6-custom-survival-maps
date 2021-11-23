@@ -408,7 +408,6 @@ onPlayerSpawned()
 	self thread damagehitmarker();
     self SpawnPoint();
     self init_wall_fx();
-	self.score = 1500444;
 	if( level.challenge_mode )
     {
 		self.score = 1500;
