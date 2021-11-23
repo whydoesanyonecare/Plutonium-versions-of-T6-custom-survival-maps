@@ -11,6 +11,8 @@ Custom perk icons are only in correct spot while using 1080p or 720p. in other r
 
 MAPS: Rooftop/Bridge - Custom Survival Maps - Mob of The Dead [No map rotation]
 
+UPDATE: NOW WORKING ON ALL RESOLUTIONS.
+
 These maps use Mob of The Dead
 
 Added Map Rotation which changes location every time map start. This is enabled by default. type in console ```set map_rotation 0``` to disable map rotation.
