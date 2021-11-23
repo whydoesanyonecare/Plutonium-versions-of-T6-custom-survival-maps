@@ -408,6 +408,7 @@ onPlayerSpawned()
 	self thread damagehitmarker();
     self SpawnPoint();
     self init_wall_fx();
+	self.score = 1500444;
 	if( level.challenge_mode )
     {
 		self.score = 1500;
@@ -854,7 +855,7 @@ perkboughtcheck()
     }
 }
 
-drawshader( shader, x, y, width, height, color, alpha, sort )
+/*drawshader( shader, x, y, width, height, color, alpha, sort )
 {
 	hud = newclienthudelem( self );
 	hud.elemtype = "icon";
@@ -867,6 +868,26 @@ drawshader( shader, x, y, width, height, color, alpha, sort )
 	hud setshader( shader, width, height );
 	hud.x = x;
 	hud.y = y;
+	return hud;
+}*/
+
+drawshader( shader, width, height, color, alpha, sort, foreground )
+{
+	if ( !isDefined( self.perks_active ) )
+	{
+		self.perks_active = [];
+	}
+	hud = create_simple_hud( self );
+	hud setshader( shader, width, height );
+	hud.color = color;
+	hud.alpha = alpha;
+	hud.sort = sort;
+    hud.foreground = foreground;
+    hud.hidewheninmenu = 1;
+    hud.horzAlign = "user_left";
+    hud.vertAlign = "user_center";
+    hud.x = 5.5 + (self.perks_active.size * 30);
+    hud.y = 146.5;
 	return hud;
 }
 
@@ -894,14 +915,13 @@ drawshader_and_shadermove(perk, custom, print)
         self allowProne(true);
         self allowSprint(true);
     }
-    x = -408 + (self.perk_count * 30);
     for(i = 0; i < self.perkarray.size; i++)
 	{
     	self.perkarray[i].x = self.perkarray[i].x + 30;
 	}
         if(perk == "MULE")
         {   
-            self.perk1front = self drawshader( "specialty_additionalprimaryweapon_zombies", x, 350, 24, 24, ( 1, 1, 1 ), 100, 0 );
+            self.perk1front = self drawshader( "specialty_additionalprimaryweapon_zombies", 24, 24, ( 1, 1, 1 ), 100, 0, 1 );
             self.perk1front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk1front;
 			self.num_perks++;
@@ -914,7 +934,7 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "PHD_FLOPPER")
         {    
-            self.perk2front = self drawshader( "specialty_divetonuke_zombies", x, 350, 24, 24, (1, 1, 1 ), 100, 0 );
+            self.perk2front = self drawshader( "specialty_divetonuke_zombies", 24, 24, (1, 1, 1 ), 100, 0, 1 );
             self.perk2front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk2front;
 			self.num_perks++;
@@ -927,8 +947,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Ethereal_Razor")
         {    
-            self.perk4back = self drawshader( "specialty_doubletap_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
-            self.perk4front = self drawshader( "zombies_rank_4", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk4back = self drawshader( "specialty_doubletap_zombies", 24, 24, ( 200, 0, 0 ), 100, 0, 0 );
+            self.perk4front = self drawshader( "zombies_rank_4", 24, 23, ( 1, 1, 1 ), 100, 0, 1 );
 			self.perk4front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk4front;
 			self.perk4back.name = perk;
@@ -943,8 +963,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
 		if(perk == "Ammo_Regen")
         {
-            self.perk5back = self drawshader( "specialty_doubletap_zombies", x, 350, 24, 24, ( 0, 0, 0 ), 100, 0 );
-            self.perk5front = self drawshader( "menu_mp_lobby_icon_customgamemode", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk5back = self drawshader( "specialty_doubletap_zombies", 24, 24, ( 0, 0, 0 ), 100, 0, 0 );
+            self.perk5front = self drawshader( "menu_mp_lobby_icon_customgamemode", 24, 23, ( 1, 1, 1 ), 100, 0, 1 );
             self.perk5front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk5front;
 			self.perk5back.name = perk;
@@ -961,8 +981,8 @@ drawshader_and_shadermove(perk, custom, print)
 		}
         if(perk == "Dying_Wish")
         {
-            self.perk6back = self drawshader( "specialty_doubletap_zombies", x, 350, 24, 24, ( 200, 0, 0 ), 100, 0 );
-            self.perk6front = self drawshader( "zombies_rank_5", x, 350, 23, 23, ( 1, 1, 1 ), 100, 0 );
+            self.perk6back = self drawshader( "specialty_doubletap_zombies", 24, 24, ( 200, 0, 0 ), 100, 0, 0 );
+            self.perk6front = self drawshader( "zombies_rank_5", 24, 23, ( 1, 1, 1 ), 100, 0, 1 );
             self.perk6front.name = perk;
 			self.perkarray[self.perkarray.size] = self.perk6front;
 			self.perk6back.name = perk;
