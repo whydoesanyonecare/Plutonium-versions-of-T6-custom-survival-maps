@@ -60,6 +60,8 @@ MAP The Bus: >> map may have bugs please report any you find.
 
 This map uses TranZit
 
+UPDATE: custom perk isons work on all resolutions, added mysterybox to bus and updated safe area teleporter.
+
 Made additional start / safe area to this custom survival map
 
 in safearea is Pack a Punch, Mystery box and Perks.
