@@ -96,11 +96,13 @@ init()
         level.custom_vending_precaching = ::default_vending_precaching;
         level.get_player_weapon_limit = ::custom_get_player_weapon_limit;
         level.zombie_last_stand = ::LastStand;
+		register_zombie_damage_callback( ::zombie_damage_response );
         register_player_damage_callback( ::playerdamagelastcheck );
 		register_zombie_death_event_callback( ::Custom_death_callback );
         level.effect_WebFX = loadfx("misc/fx_zombie_powerup_solo_grab");
         level._effect[ "building_dust" ] = loadfx( "maps/zombie/fx_zmb_buildable_assemble_dust" );
         level._effect[ "screecher_vortex" ] = loadfx( "maps/zombie/fx_zmb_screecher_vortex" );
+		level._effect[ "wall_bowie" ] = loadfx( "maps/zombie/fx_zmb_wall_buy_bowie");
         add_zombie_hint( "default_shared_box", "Hold ^3&&1^7 for weapon");
         safe_area();
 		level thread onPlayerConnect();
@@ -124,6 +126,8 @@ init()
 		level.power_up[1] = "insta_kill";
 		level.power_up[2] = "double_points";
 		level.power_up[3] = "full_ammo";
+		thread wallweaponmonitorbox((9988.26, 8532.03, 1012.13), (0, 0, 0),"bowie_knife_zm", 3000, "zombie_bowie_flourish" );
+		thread playchalkfx("wall_bowie", (9996.26, 8532.03, 1012.13), (0, 0, 0 ));
 	}
 	else
 	{
@@ -617,93 +621,92 @@ timer()
 }
 
 safe_area()
-{
-        collision( "script_model", (10100, 8550, 960.125), "", ( 0, 0, 0 ), "teleport" ); //teleport portal
+{	
+	collision( "script_model", (10100, 8550, 960.125), "", ( 0, 0, 0 ), "teleport" ); //teleport portal
 
-        collision( "script_model", (10406, 8516, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	    collision( "script_model", (10271, 8515, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	    collision( "script_model", (10136, 8513, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	    collision( "script_model", (10005, 8512, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-		collision( "script_model", (10120, 8535, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-		//box wall
-	    collision( "script_model", (10404, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-	    collision( "script_model", (10403, 8776, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-	    collision( "script_model", (10402, 8911, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-	    collision( "script_model", (10401, 9046, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-		collision( "script_model", (10370, 8780, 1045), "collision_wall_512x512x10_standard", ( 0, 90, 0 ) ); 
-	    collision( "script_model", (10267, 9047, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	    collision( "script_model", (10131, 9046, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	    collision( "script_model", (9997, 9045, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	    collision( "script_model", (9868, 9044, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	    collision( "script_model", (9732, 9043, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	    collision( "script_model", (9597, 9042, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	    collision( "script_model", (9462, 9041, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	    collision( "script_model", (9327, 9040, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-		collision( "script_model", (10130, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9880, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9680, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9600, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	    collision( "script_model", (9810, 8911, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-	    collision( "script_model", (9811, 8776, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-	    collision( "script_model", (9812, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-		collision( "script_model", (9813, 8776, 1045), "collision_wall_512x512x10_standard", ( 0, 90, 0 ) ); 
-	    collision( "script_model", (9462, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	    collision( "script_model", (9597, 8642, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	    collision( "script_model", (9733, 8643, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	    collision( "script_model", (9768, 8645, 1070), "p6_zm_bank_vault_floor_hatch", ( 0, 180, 90 ) ); 
-	    collision( "script_model", (9768, 8644, 935), "p6_zm_bank_vault_floor_hatch", ( 0, 180, 90 ) ); 
-		collision( "script_model", (9533, 8655, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9633, 8655, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	    collision( "script_model", (9869, 8520, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-		collision( "script_model", (9890, 8592, 1045), "collision_wall_128x128x10_standard", ( 0, 90, 0 ) ); 
+	collision( "script_model", (10406, 8516, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
+	collision( "script_model", (10271, 8515, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
+	collision( "script_model", (10136, 8513, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
+	collision( "script_model", (10005, 8512, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
+	collision( "script_model", (10120, 8535, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
+	//box wall
+	collision( "script_model", (10404, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
+	collision( "script_model", (10403, 8776, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
+	collision( "script_model", (10402, 8911, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
+	collision( "script_model", (10401, 9046, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
+	collision( "script_model", (10370, 8780, 1045), "collision_wall_512x512x10_standard", ( 0, 90, 0 ) ); 
+	collision( "script_model", (10267, 9047, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (10131, 9046, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (9997, 9045, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (9868, 9044, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (9732, 9043, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (9597, 9042, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (9462, 9041, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (9327, 9040, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
+	collision( "script_model", (10130, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9880, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9680, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9600, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9810, 8911, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
+	collision( "script_model", (9811, 8776, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
+	collision( "script_model", (9812, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
+	collision( "script_model", (9813, 8776, 1045), "collision_wall_512x512x10_standard", ( 0, 90, 0 ) ); 
+	collision( "script_model", (9462, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
+	collision( "script_model", (9597, 8642, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
+	collision( "script_model", (9733, 8643, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
+	collision( "script_model", (9768, 8645, 1070), "p6_zm_bank_vault_floor_hatch", ( 0, 180, 90 ) ); 
+	collision( "script_model", (9768, 8644, 935), "p6_zm_bank_vault_floor_hatch", ( 0, 180, 90 ) ); 
+	collision( "script_model", (9533, 8655, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9633, 8655, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9869, 8520, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
+	collision( "script_model", (9890, 8592, 1045), "collision_wall_128x128x10_standard", ( 0, 90, 0 ) ); 
 
-		//floor 
-	    collision( "script_model", (10280, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	    collision( "script_model", (10280, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	    collision( "script_model", (10280, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	    collision( "script_model", (10280, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (10045, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (10045, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (10045, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (10045, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9810, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9810, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9810, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (9810, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-		collision( "script_model", (10130, 8780, 955), "collision_wall_512x512x10_standard", ( 0, 0, 90 ) ); 
-		collision( "script_model", (9630, 8780, 955), "collision_wall_512x512x10_standard", ( 0, 0, 90 ) ); 
+	//floor 
+	collision( "script_model", (10280, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10280, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10280, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10280, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10045, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10045, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10045, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10045, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9810, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9810, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9810, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (9810, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
+	collision( "script_model", (10130, 8780, 955), "collision_wall_512x512x10_standard", ( 0, 0, 90 ) ); 
+	collision( "script_model", (9630, 8780, 955), "collision_wall_512x512x10_standard", ( 0, 0, 90 ) ); 
 
-		//roof 
-	    collision( "script_model", (10280, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	    collision( "script_model", (10280, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	    collision( "script_model", (10280, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	    collision( "script_model", (10280, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (10045, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (10045, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (10045, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (10045, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (9810, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (9810, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (9810, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		collision( "script_model", (9810, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-		
-		perk_system( "script_model", (9885, 8592, 965), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "random", "mus_perks_speed_sting", "Random Perk", 1500, "jugger_light" );
-		perk_system( "script_model", ( 10250, 8552, 960 ), "p6_anim_zm_buildable_pap_on", ( 0, 180, 0 ), "pap", "zmb_perks_packa_upgrade", "Pack-A-Punch", 5000 );
-        perk_system( "script_model", (9840, 8705, 965), "zombie_vending_revive_on", ( 0, 90, 0 ), "revive" );
-	    perk_system( "script_model", (9840, 8765, 965), "zombie_vending_jugg_on", ( 0, 90, 0 ), "original", "mus_perks_jugganog_sting", "Jugger-Nog", 2500, "jugger_light", "specialty_armorvest" );
-	    perk_system( "script_model", (9840, 8825, 965), "zombie_vending_marathon_on", ( 0, 90, 0 ), "original", "mus_perks_stamin_sting", "Stamin-Up", 2000, "marathon_light", "specialty_longersprint" );
-	    perk_system( "script_model", (9840, 8895, 965), "zombie_vending_sleight_on", ( 0, 90, 0 ), "original", "mus_perks_speed_sting", "Speed Cola", 3000, "sleight_light", "specialty_fastreload" );
-	    perk_system( "script_model", (9830, 8970, 965), "zombie_vending_doubletap2_on", ( 0, 90, 0 ), "original", "mus_perks_doubletap_sting", "Double Tap Root Beer", 2000, "doubletap_light", "specialty_rof" );
-        perk_system( "script_model", ( 9915, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_deadshot_sting", "Widow's Wine", 4000, "tombstone_light", "WIDOWS_WINE" );
-        perk_system( "script_model", ( 9985, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_packa_sting", "Electric Cherry", 2000, "tombstone_light", "ELECTRIC_CHERRY" );
-        perk_system( "script_model", ( 10055, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Ethereal Razor", 4000, "tombstone_light", "Ethereal_Razor" );
-        perk_system( "script_model", ( 10125, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Mule Kick", 4000, "tombstone_light", "MULE" );
-		perk_system( "script_model", ( 10195, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_packa_sting", "PhD Flopper", 2000, "tombstone_light", "PHD_FLOPPER" );
-		perk_system( "script_model", ( 10265, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Downer's Delight", 2500, "tombstone_light", "Downers_Delight" );
-	    perk_system( "script_model", ( 10335, 9030, 965  ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Dying Wish", 5000, "tombstone_light", "Dying_Wish" );
-        perk_system( "script_model", ( 10380, 8740, 965  ), "zombie_vending_tombstone_on", ( 0, -90, 0 ), "custom", "mus_perks_doubletap_sting", "Ammo Regen", 2500, "marathon_light", "Ammo_Regen" );
-	    perk_system( "script_model", ( 10380, 8670, 965  ), "zombie_vending_tombstone_on", ( 0, -90, 0 ), "custom", "mus_perks_deadshot_sting", "Deadshot", 2000, "revive_light", "deadshot" );
-        
+	//roof 
+	collision( "script_model", (10280, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (10280, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (10280, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (10280, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (10045, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (10045, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (10045, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (10045, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (9810, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (9810, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (9810, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	collision( "script_model", (9810, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
+	
+	perk_system( "script_model", (9885, 8592, 965), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "random", "mus_perks_speed_sting", "Random Perk", 1500, "jugger_light" );
+	perk_system( "script_model", ( 10250, 8552, 960 ), "p6_anim_zm_buildable_pap_on", ( 0, 180, 0 ), "pap", "zmb_perks_packa_upgrade", "Pack-A-Punch", 5000 );
+	perk_system( "script_model", (9840, 8705, 965), "zombie_vending_revive_on", ( 0, 90, 0 ), "revive" );
+	perk_system( "script_model", (9840, 8765, 965), "zombie_vending_jugg_on", ( 0, 90, 0 ), "original", "mus_perks_jugganog_sting", "Jugger-Nog", 2500, "jugger_light", "specialty_armorvest" );
+	perk_system( "script_model", (9840, 8825, 965), "zombie_vending_marathon_on", ( 0, 90, 0 ), "original", "mus_perks_stamin_sting", "Stamin-Up", 2000, "marathon_light", "specialty_longersprint" );
+	perk_system( "script_model", (9840, 8895, 965), "zombie_vending_sleight_on", ( 0, 90, 0 ), "original", "mus_perks_speed_sting", "Speed Cola", 3000, "sleight_light", "specialty_fastreload" );
+	perk_system( "script_model", (9830, 8970, 965), "zombie_vending_doubletap2_on", ( 0, 90, 0 ), "original", "mus_perks_doubletap_sting", "Double Tap Root Beer", 2000, "doubletap_light", "specialty_rof" );
+	perk_system( "script_model", ( 9915, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_deadshot_sting", "Widow's Wine", 4000, "tombstone_light", "WIDOWS_WINE" );
+	perk_system( "script_model", ( 9985, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_packa_sting", "Electric Cherry", 2000, "tombstone_light", "ELECTRIC_CHERRY" );
+	perk_system( "script_model", ( 10055, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Ethereal Razor", 4000, "tombstone_light", "Ethereal_Razor" );
+	perk_system( "script_model", ( 10125, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Mule Kick", 4000, "tombstone_light", "MULE" );
+	perk_system( "script_model", ( 10195, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_packa_sting", "PhD Flopper", 2000, "tombstone_light", "PHD_FLOPPER" );
+	perk_system( "script_model", ( 10265, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Downer's Delight", 2500, "tombstone_light", "Downers_Delight" );
+	perk_system( "script_model", ( 10335, 9030, 965  ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Dying Wish", 5000, "tombstone_light", "Dying_Wish" );
+	perk_system( "script_model", ( 10380, 8740, 965  ), "zombie_vending_tombstone_on", ( 0, -90, 0 ), "custom", "mus_perks_doubletap_sting", "Ammo Regen", 2500, "marathon_light", "Ammo_Regen" );
+	perk_system( "script_model", ( 10380, 8670, 965  ), "zombie_vending_tombstone_on", ( 0, -90, 0 ), "custom", "mus_perks_deadshot_sting", "Deadshot", 2000, "revive_light", "deadshot" );
 }
 
 collision( script, pos, model, angles, type )
@@ -1864,7 +1867,7 @@ drawshader_and_shadermove(perk, custom, print)
 			{
 				self iprintln("^9Deadshot");
 				wait 0.2;
-				self iprintln("This Perk aims automatically enemys head instead of body.");
+				self iprintln("This Perk increase headshot damage.");
         	}
 		}
 }
@@ -1922,7 +1925,11 @@ custom_get_player_weapon_limit( player )
     if ( player hascustomperk("MULE") )
     {
         weapon_limit = 3;
-    } 
+    }
+	if(self.flourish)
+	{
+		weapon_limit += 1;
+	}
 	else 
 	{
 		weapons = self getWeaponsListPrimaries();
@@ -1949,9 +1956,16 @@ start_er()
 				{
 					if(self is_insta_kill_active())
 					{
-						zombie doDamage(zombie.health + 666, (0, 0, 0));
+						zombie doDamage(zombie.maxhealth * 2, (0, 0, 0));
 					}
-                    zombie dodamage(500, (0, 0, 0));
+					if(level.round_number < 7)
+					{
+						zombie doDamage(zombie.maxhealth * 2, (0, 0, 0));
+					}
+					else
+					{
+						zombie dodamage(zombie.maxhealth / 2, (0, 0, 0));
+					}
                     if(zombie.health <= 0)
 					{
                         self maps/mp/zombies/_zm_score::add_to_player_score( 100 );
@@ -2627,6 +2641,12 @@ init_starting_chest_location( start_chest_name )
 
 spawn_points()
 {
+	structs = getstructarray("initial_spawn", "script_noteworthy");
+    for(i=0;i<structs.size;i++)
+    {
+        structs[i].origin = (10130, 8770, 970);
+        structs[i].target = "pf1801_auto2385";
+    }
 	spawnpointstruct = undefined;
     spawnpointstruct = "initial_spawn_points";
     spawn = GetstructArray( spawnpointstruct, "targetname" );
@@ -2646,4 +2666,107 @@ spawn_points()
     {
 		targetforrespawn[i].origin = level.safezonespawns[i];
 	}
+}
+
+wallweaponmonitorbox(origin, angles, weapon, cost, weapon_change )
+{
+	name = get_weapon_display_name( weapon );
+	model = spawn("script_model", origin);
+	model.angles = angles;
+	model setmodel(getweaponmodel( weapon ));
+	trigger = spawn("trigger_radius", (9988.26, 8532.03, 980.13), 0, 35, 80);
+	trigger SetCursorHint("HINT_NOICON");
+	trigger SetHintString("Hold ^3&&1^7 to buy " + name + " [Cost: " + cost + "]");
+    for(;;)
+    {
+		trigger waittill("trigger", player);
+		if( player usebuttonpressed() && !(player hasWeapon(weapon)) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand() && player can_buy_weapon())
+		{
+			player playsound( "zmb_cha_ching" );
+			player.score -= cost;
+			play_sound_at_pos( "weapon_show", origin, player );
+			if(isdefined(weapon_change))
+			{
+				player thread weapon_change(weapon, weapon_change);
+			}
+			else
+			{
+				player thread weapon_give( weapon, 0, 1 );
+			}
+			wait 1;
+		}
+		else
+		{
+			if( player usebuttonpressed() && !player hasWeapon(weapon) && player.score < cost )
+			{
+				player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "no_money_weapon" );
+			}
+		}
+        wait 0.1;
+    }
+}
+
+weapon_change(weapon, flourish)
+{
+	if(!isdefined(self.flourish))
+	{
+		self.flourish = 0;
+	}
+	self.flourish = 1;
+	weap = self getcurrentweapon();
+	self thread weapon_give(flourish, 0, 1);
+	self waittill("weapon_change_complete");
+	self takeweapon(flourish);
+	self switchtoweapon(weap);
+	self thread weapon_give( weapon, 0, 1 );
+	self.flourish = 0;
+}
+
+playchalkfx(effect, origin, angles)
+{
+    for(;;)
+	{
+		fx = SpawnFX(level._effect[ effect ], origin,AnglesToForward(angles),AnglesToUp(angles));
+		TriggerFX(fx);
+		level waittill("connected", player);
+		fx Delete();
+	}
+}
+
+zombie_damage_response( einflictor, eattacker, idamage, idflags, smeansofdeath, sweapon, vpoint, vdir, shitloc, psoffsettime, boneindex )
+{
+	if ( isDefined( self ) && isDefined( self.damagelocation ) && isDefined( self.damagemod ) && isDefined( self.damageweapon ) && isDefined( self.attacker ) && isplayer( self.attacker ) && self.attacker HasCustomPerk("deadshot"))
+	{
+		if ( is_headshot( self.damageweapon, self.damagelocation, self.damagemod ) )
+		{
+			idamage = int(idamage * 2);
+		}
+	}
+	return idamage;
+}
+
+can_buy_weapon()
+{
+	if ( isDefined( self.is_drinking ) && self.is_drinking > 0 )
+	{
+		return 0;
+	}
+	if ( self IsSwitchingWeapons() )
+	{
+		return 0;
+	}
+	current_weapon = self getcurrentweapon();
+	if ( is_placeable_mine( current_weapon ) || is_equipment_that_blocks_purchase( current_weapon ) )
+	{
+		return 0;
+	}
+	if ( self in_revive_trigger() )
+	{
+		return 0;
+	}
+	if ( current_weapon == "none" )
+	{
+		return 0;
+	}
+	return 1;
 }
