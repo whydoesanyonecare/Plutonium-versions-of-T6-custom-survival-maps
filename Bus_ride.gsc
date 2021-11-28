@@ -2740,7 +2740,7 @@ zombie_damage_response( einflictor, eattacker, idamage, idflags, smeansofdeath, 
 			idamage = int(idamage * 2);
 		}
 	}
-	return idamage;
+	return 0;
 }
 
 can_buy_weapon()
