@@ -161,6 +161,7 @@ onplayerspawned()
     self.num_perks = 0;
     self.teleported = 0;
     self.menu_open = 0;
+	self.flourish = 0;
     self.isinsafearea = 1;
     self thread removeperkshader();
 	self thread damagehitmarker();
@@ -449,7 +450,8 @@ lag_failsafe()
 		{
 		
 		}
-		else{
+		else
+		{
 			if(distance((10180, 8716, 970), self.origin) > 500 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
 			{
            		self setorigin((teleport.origin - (0,0,150)));
@@ -2708,10 +2710,6 @@ wallweaponmonitorbox(origin, angles, weapon, cost, weapon_change )
 
 weapon_change(weapon, flourish)
 {
-	if(!isdefined(self.flourish))
-	{
-		self.flourish = 0;
-	}
 	self.flourish = 1;
 	weap = self getcurrentweapon();
 	self thread weapon_give(flourish, 0, 1);
