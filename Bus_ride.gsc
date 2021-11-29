@@ -96,11 +96,9 @@ init()
         level.custom_vending_precaching = ::default_vending_precaching;
         level.get_player_weapon_limit = ::custom_get_player_weapon_limit;
         level.zombie_last_stand = ::LastStand;
-		register_zombie_damage_callback( ::zombie_damage_response );
         register_player_damage_callback( ::playerdamagelastcheck );
 		register_zombie_death_event_callback( ::Custom_death_callback );
         level.effect_WebFX = loadfx("misc/fx_zombie_powerup_solo_grab");
-        level._effect[ "building_dust" ] = loadfx( "maps/zombie/fx_zmb_buildable_assemble_dust" );
         level._effect[ "screecher_vortex" ] = loadfx( "maps/zombie/fx_zmb_screecher_vortex" );
 		level._effect[ "wall_bowie" ] = loadfx( "maps/zombie/fx_zmb_wall_buy_bowie");
         add_zombie_hint( "default_shared_box", "Hold ^3&&1^7 for weapon");
@@ -126,8 +124,10 @@ init()
 		level.power_up[1] = "insta_kill";
 		level.power_up[2] = "double_points";
 		level.power_up[3] = "full_ammo";
+		playfx(loadfx( "maps/zombie/fx_zmb_screecher_vortex" ), ( 10100, 8525, 1010 ), anglestoforward( ( 90, -90, 0 ) ) );
 		thread wallweaponmonitorbox((9988.26, 8532.03, 1012.13), (0, 0, 0),"bowie_knife_zm", 3000, "zombie_bowie_flourish" );
 		thread playchalkfx("wall_bowie", (9996.26, 8532.03, 1012.13), (0, 0, 0 ));
+		level.callbackactordamage = ::actor_damage_override_wrapper;
 	}
 	else
 	{
@@ -162,7 +162,6 @@ onplayerspawned()
     self.teleported = 0;
     self.menu_open = 0;
 	self.flourish = 0;
-    self.isinsafearea = 1;
     self thread removeperkshader();
 	self thread damagehitmarker();
 	level thread OnGameEndedHint(self);
@@ -170,7 +169,6 @@ onplayerspawned()
     self thread timer();
 	self thread lag_failsafe();
     flag_wait( "initial_blackscreen_passed" );
-	playfx(loadfx( "maps/zombie/fx_zmb_screecher_vortex" ), ( 10100, 8525, 1010 ), anglestoforward( ( 90, -90, 0 ) ) );
     wait 3;
     self iprintln("The ^1Bus ^7Ride - Survival");
 	for(;;)
@@ -388,7 +386,7 @@ monitor_life()
 		}
 		wait 1;
 	}
-	self dodamage(self.maxhealth + 666,(0,0,0));
+	self dodamage(self.maxhealth * 2, (0,0,0));
 	self delete();
 }
 
@@ -446,16 +444,9 @@ lag_failsafe()
     teleport = getent( "bus_roof_watch", "targetname" );
 	for(;;)
 	{
-		if(self.isinsafearea == 1)
+		if(distance((10180, 8716, 970), self.origin) > 500 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
 		{
-		
-		}
-		else
-		{
-			if(distance((10180, 8716, 970), self.origin) > 500 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
-			{
-           		self setorigin((teleport.origin - (0,0,150)));
-			}
+			self setorigin((teleport.origin - (0,0,150)));
 		}
 		wait .1;
 	}
@@ -475,14 +466,12 @@ teleport_avogadro()
 				zombie forceteleport(( 1588.01, 62.551, 1000.875 ));
 			}
 		}
-		wait 0.3;
+		wait .3;
 	}
 }
 
 portal()
 {
-    x = randomfloatrange(-30, -40);
-    y = randomfloatrange(10, 20);
     teleport = getent( "bus_roof_watch", "targetname" );
 	while(1)
 	{
@@ -607,10 +596,7 @@ timer()
 		}
         if(i == 0)
         {
-            x = randomfloatrange(10, 20);
-            y = randomfloatrange(10, 20);
-            self.isinsafearea = 0;
-		    self setorigin((level.the_bus.origin + (x,y,20)));
+		    self setorigin((level.the_bus.origin + (0,0,20)));
         }
         if(self.teleported)
         {
@@ -1001,7 +987,7 @@ bus_treasure_chest_think()
 		{
 			play_sound_at_pos( "no_purchase", self.origin );
 			user maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "no_money_box" );
-			wait 0.1;
+			wait .1;
 			continue;
 		}
 		wait .05;
@@ -2673,9 +2659,6 @@ spawn_points()
 wallweaponmonitorbox(origin, angles, weapon, cost, weapon_change )
 {
 	name = get_weapon_display_name( weapon );
-	model = spawn("script_model", origin);
-	model.angles = angles;
-	model setmodel(getweaponmodel( weapon ));
 	trigger = spawn("trigger_radius", (9988.26, 8532.03, 980.13), 0, 35, 80);
 	trigger SetCursorHint("HINT_NOICON");
 	trigger SetHintString("Hold ^3&&1^7 to buy " + name + " [Cost: " + cost + "]");
@@ -2684,9 +2667,16 @@ wallweaponmonitorbox(origin, angles, weapon, cost, weapon_change )
 		trigger waittill("trigger", player);
 		if( player usebuttonpressed() && !(player hasWeapon(weapon)) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand() && player can_buy_weapon())
 		{
+			
 			player playsound( "zmb_cha_ching" );
 			player.score -= cost;
-			play_sound_at_pos( "weapon_show", origin, player );
+			if(!isdefined(model))
+			{
+				play_sound_at_pos( "weapon_show", origin, player );
+				model = spawn("script_model", origin);
+				model.angles = angles;
+				model setmodel(getweaponmodel( weapon ));
+			}
 			if(isdefined(weapon_change))
 			{
 				player thread weapon_change(weapon, weapon_change);
@@ -2731,18 +2721,6 @@ playchalkfx(effect, origin, angles)
 	}
 }
 
-zombie_damage_response( einflictor, eattacker, idamage, idflags, smeansofdeath, sweapon, vpoint, vdir, shitloc, psoffsettime, boneindex )
-{
-	if ( isDefined( self ) && isDefined( self.damagelocation ) && isDefined( self.damagemod ) && isDefined( self.damageweapon ) && isDefined( self.attacker ) && isplayer( self.attacker ) && self.attacker HasCustomPerk("deadshot"))
-	{
-		if ( is_headshot( self.damageweapon, self.damagelocation, self.damagemod ) )
-		{
-			idamage = int(idamage * 2);
-		}
-	}
-	return 0;
-}
-
 can_buy_weapon()
 {
 	if ( isDefined( self.is_drinking ) && self.is_drinking > 0 )
@@ -2767,4 +2745,60 @@ can_buy_weapon()
 		return 0;
 	}
 	return 1;
+}
+
+actor_damage_override_wrapper( inflictor, attacker, damage, flags, meansofdeath, weapon, vpoint, vdir, shitloc, psoffsettime, boneindex ) //checked does not match cerberus output did not change
+{
+	damage_override = self actor_damage_override( inflictor, attacker, damage, flags, meansofdeath, weapon, vpoint, vdir, shitloc, psoffsettime, boneindex );
+	if ( ( self.health - damage_override ) > 0 || !is_true( self.dont_die_on_me ) )
+	{
+		self finishactordamage( inflictor, attacker, damage_override, flags, meansofdeath, weapon, vpoint, vdir, shitloc, psoffsettime, boneindex );
+	}
+}
+
+actor_damage_override( inflictor, attacker, damage, flags, meansofdeath, weapon, vpoint, vdir, shitloc, psoffsettime, boneindex ) //checked changed to match cerberus output //checked against bo3 _zm.gsc partially changed to match
+{
+	if ( !isDefined( self ) || !isDefined( attacker ) )
+	{
+		return damage;
+	}
+	if ( !isplayer( attacker ) && isDefined( self.non_attacker_func ) )
+	{
+		if ( isDefined( self.non_attack_func_takes_attacker ) && self.non_attack_func_takes_attacker )
+		{
+			return self [[ self.non_attacker_func ]]( damage, weapon, attacker );
+		}
+		else
+		{
+			return self [[ self.non_attacker_func ]]( damage, weapon );
+		}
+	}
+	if ( !isplayer( attacker ) && !isplayer( self ) )
+	{
+		return damage;
+	}
+	if ( !isDefined( damage ) || !isDefined( meansofdeath ) )
+	{
+		return damage;
+	}
+	if ( meansofdeath == "" )
+	{
+		return damage;
+	}
+	old_damage = damage;
+	final_damage = damage;
+	if ( isDefined( self.actor_damage_func ) )
+	{
+		final_damage = [[ self.actor_damage_func ]]( inflictor, attacker, damage, flags, meansofdeath, weapon, vpoint, vdir, shitloc, psoffsettime, boneindex );
+	}
+	attacker thread maps/mp/gametypes_zm/_weapons::checkhit( weapon );
+	if ( attacker maps/mp/zombies/_zm_pers_upgrades_functions::pers_mulit_kill_headshot_active() && is_headshot( weapon, shitloc, meansofdeath ) )
+	{
+		final_damage *= 2;
+	}
+	if ( isDefined( attacker ) && isPlayer( attacker ) && attacker HasCustomPerk("deadshot") && is_headshot( weapon, shitloc, meansofdeath ) )
+	{
+		final_damage *= 2;
+	}
+	return int( final_damage );
 }
