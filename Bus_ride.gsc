@@ -26,6 +26,7 @@
 #include maps/mp/gametypes_zm/_globallogic_ui;
 #include maps/mp/gametypes_zm/_hostmigration;
 #include maps/mp/gametypes_zm/_globallogic_score;
+#include maps/mp/gametypes_zm/_hud;
 #include maps/mp/gametypes_zm/_globallogic;
 #include maps/mp/zombies/_zm;
 #include maps/mp/zombies/_zm_ai_faller;
@@ -71,9 +72,8 @@ init()
 	if( getdvar( "mapname" ) == "zm_transit" && getdvar ( "g_gametype")  == "zclassic" )
 	{
 		level.failsafespawns = array((-6814, 5176, -55),(-6814, 5206, -57),(-6814, 5256, -57),(-6804, 5146, -57),(-6816, 5136, -55),(-6674, 5206, -57),(-6800, 5246, -57),(-6824, 5126, -57),(-6800, 5256, -57),(-6814, 5200, -57),(-6810, 5246, -57),(-6714, 5356, -57));
-		level.safezonespawns = array((10180, 8716, 970),(10130, 8770, 970),(10150, 8720, 970),(10140, 8690, 970),(10130, 8770, 970),(10110, 8690, 970),(10160, 8710, 970),(10170, 8680, 970),(10139, 8716, 970),(10194, 8702, 970),(10170, 8710, 970),(10160, 8706, 970));
-		level spawn_points();
-		level.precachemodels = array("p_glo_tools_chest_short","p_glo_red_toolbox","collision_wall_256x256x10_standard","collision_clip_32x32x32","collision_clip_64x64x64","p6_window_frame_wood_white_diner","p6_zm_buildable_sq_meteor","p_rus_bathroom_papertowel","p_glo_bathroom_sink","bathroom_urinal","p_glo_bathroom_toilet","veh_t6_civ_bus_zombie","zombie_vending_tombstone_on","collision_wall_512x512x10_standard","collision_clip_32x32x128","p6_anim_zm_buildable_pap_on");
+		level.safezonespawns = array((-6775.15, 4713.94, 4462.69),(-6934.69, 4705.77, 4462.69),(-7029.56, 4776.02, 4462.69),(-7008.06, 4885.69, 4462.69),(-6891.29, 4979.14, 4462.69),(-6748.49, 4957.34, 4462.69),(-6748.49, 4957.34, 4462.69),(-6739.88, 4848.01, 4462.69),(-7068.23, 4846.95, 4462.69),(-7125.63, 4667.52, 4462.69),(-7211.49, 4659.26, 4462.69),(-6692.69, 4741.78, 4462.69));
+		level.precachemodels = array("","p6_zm_kiosk","t6_wpn_zmb_raygun_view","p6_zm_building_rundown_01","p6_zm_building_rundown_03","p_glo_tools_chest_short","p_glo_red_toolbox","collision_wall_256x256x10_standard","collision_clip_32x32x32","collision_clip_64x64x64","p6_window_frame_wood_white_diner","p6_zm_buildable_sq_meteor","p_rus_bathroom_papertowel","p_glo_bathroom_sink","bathroom_urinal","p_glo_bathroom_toilet","veh_t6_civ_bus_zombie","zombie_vending_tombstone_on","collision_wall_512x512x10_standard","collision_clip_32x32x128","p6_anim_zm_buildable_pap_on");
 		foreach(model in level.precachemodels)
 		{
 			precachemodel(model);
@@ -99,10 +99,15 @@ init()
         register_player_damage_callback( ::playerdamagelastcheck );
 		register_zombie_death_event_callback( ::Custom_death_callback );
         level.effect_WebFX = loadfx("misc/fx_zombie_powerup_solo_grab");
+        level._effect[ "building_dust" ] = loadfx( "maps/zombie/fx_zmb_buildable_assemble_dust" );
         level._effect[ "screecher_vortex" ] = loadfx( "maps/zombie/fx_zmb_screecher_vortex" );
 		level._effect[ "wall_bowie" ] = loadfx( "maps/zombie/fx_zmb_wall_buy_bowie");
+		level._effect[ "wall_semtex" ] = loadfx( "maps/zombie/fx_zmb_wall_buy_semtex");
+		level._effect[ "wall_tazer" ] = loadfx( "maps/zombie/fx_zmb_wall_buy_taseknuck");
+
         add_zombie_hint( "default_shared_box", "Hold ^3&&1^7 for weapon");
-        safe_area();
+		precachemodel("t6_wpn_zmb_raygun_view");
+		precachemodel("t6_wpn_zmb_raygun_world");
 		level thread onPlayerConnect();
 		level thread drawZombiesCounter();
         level thread teleport_avogadro();
@@ -111,6 +116,7 @@ init()
 		level thread bus_tele();
 		level thread powerups();
         level thread CheckForCurrentBox();
+        thread safe_area();
         level maps\mp\zombies\_zm_game_module::turn_power_on_and_open_doors();
         thread box_init();
         remove();
@@ -124,10 +130,16 @@ init()
 		level.power_up[1] = "insta_kill";
 		level.power_up[2] = "double_points";
 		level.power_up[3] = "full_ammo";
-		playfx(loadfx( "maps/zombie/fx_zmb_screecher_vortex" ), ( 10100, 8525, 1010 ), anglestoforward( ( 90, -90, 0 ) ) );
-		thread wallweaponmonitorbox((9988.26, 8532.03, 1012.13), (0, 0, 0),"bowie_knife_zm", 3000, "zombie_bowie_flourish" );
-		thread playchalkfx("wall_bowie", (9996.26, 8532.03, 1012.13), (0, 0, 0 ));
-		level.callbackactordamage = ::actor_damage_override_wrapper;
+        thread wallweaponmonitorbox((-7084, 4884.59, 4517), (180, -150, 0),"bowie_knife_zm", 3000, "zombie_bowie_flourish" );
+		thread playchalkfx("wall_bowie", (-7077.75, 4890.59, 4517.69), (180, -150, 0));
+
+		//thread wallweaponmonitorbox((-7361.99, 4260.04, 4206.46), (0, -80, 0),"tazer_knuckles_zm", 6000, "zombie_tazer_flourish" );
+		//thread playchalkfx("wall_tazer", (-7361.99, 4260.04, 4208.46), (0, -80, 0));
+		
+		thread wallweaponmonitorbox((-7575.19, 5027.33, 4511.69), (0, 180, 0),"semtex_bag", 500 );
+		thread playchalkfx("wall_semtex", (-7575.19, 5027.33, 4513.69), (0, 180, 0));
+
+        level.callbackactordamage = ::actor_damage_override_wrapper;
 	}
 	else
 	{
@@ -161,25 +173,58 @@ onplayerspawned()
     self.num_perks = 0;
     self.teleported = 0;
     self.menu_open = 0;
-	self.flourish = 0;
+    self.isinsafearea = 1;
     self thread removeperkshader();
 	self thread damagehitmarker();
 	level thread OnGameEndedHint(self);
 	self thread perkboughtcheck();
     self thread timer();
 	self thread lag_failsafe();
+	self thread Blackscreen();
     flag_wait( "initial_blackscreen_passed" );
+    i = randomintrange( 0, level.safezonespawns.size);
+    self SetOrigin(level.safezonespawns[i]);
+    wait .5;
+    if(isdefined(self.zzzzzzz))
+    {
+    	self.zzzzzzz destroy();
+    }
+    playfx(loadfx( "maps/zombie/fx_zmb_screecher_vortex" ), ( -7439.11, 4038.77, 4140.46 ), anglestoforward( ( 0, 0, 90 ) ) );
+	playfx(loadfx( "maps/zombie/fx_zmb_screecher_vortex" ), ( -6854.65, 5078.87, 4522.69 ), anglestoforward( ( 90, -90, 0 ) ) );
     wait 3;
     self iprintln("The ^1Bus ^7Ride - Survival");
 	for(;;)
     {
         self waittill("spawned_player");
+        self thread Blackscreen();
         self thread timer();
+        i = randomintrange( 0, level.safezonespawns.size);
+   	 	self SetOrigin(level.safezonespawns[i]);
+        wait .5;
+   		if(isdefined(self.zzzzzzz))
+    	{
+    		self.zzzzzzz destroy();
+   		}
         if(self.score < 5000)
         {
             self.score = 5000;
         }
     }
+}
+
+BlackScreen()
+{
+	self.zzzzzzz = newclienthudelem( self );
+	self.zzzzzzz.x = 0;
+	self.zzzzzzz.y = 0;
+	self.zzzzzzz.horzalign = "fullscreen";
+	self.zzzzzzz.vertalign = "fullscreen";
+	self.zzzzzzz.foreground = 1;
+	self.zzzzzzz.hidewhendead = 0;
+	self.zzzzzzz.hidewheninmenu = 0;
+	self.zzzzzzz.sort = 500;
+	self.zzzzzzz setshader( "black", 1000, 1000 );
+	self.zzzzzzz.alpha = 1;
 }
 
 vote_bar(user)
@@ -200,42 +245,61 @@ vote_bar(user)
     {
         self.vote_shader = [];
     }
-    self vote_shader("black", 212, 40, 0.85, 50, -20 );
-    self vote_shader("black", 212, 3, 1, 50, -2 );
-    self vote_text(user.name, 1, 52, -18 );
-    self vote_text(" WANTS TO TELEPORT SAFE AREA", 1, 124, -18 );
-    self vote_text("^1" + level.accepted_voters + " / " + get_players().size + " Players Accepted.", 1, 52, 0 );
-	self vote_text("^3[{+actionslot 1}] ^7Accept		^3[{+actionslot 2}] ^7Decline", 1, 165, 0 );
+    self vote_shader("black", 215, 40, 0.85, 50, -170 );
+    self vote_shader("black", 215, 3, 1, 50, -152 );
+    self vote_text(user.name, 1, 52, -168 );
+    self vote_text(" WANTS TO TELEPORT SAFE AREA", 1, 124, -168 );
+    self.huds["voters"] = self vote_text("^1" + level.accepted_voters + " / " + get_players().size + " Players Accepted.", 1, 52, -150 );
+	self vote_text("^3[{+actionslot 1}] ^7Accept	^3[{+actionslot 2}] ^7Decline", 1, 165, -150 );
     for(i=0;i<100;i++)
     {
         if(self actionSlotOneButtonPressed())
         {
 			self.accepted_teleport = 1;
 			level.accepted_voters++;
-            foreach(hud in self.vote_text)
-            {
-                hud destroy();
-            }
-            self vote_text(user.name, 1, 52, -18 );
-            self vote_text(" WANTS TO TELEPORT SAFE AREA", 1, 124, -18 );
-    		self vote_text("^1" + level.accepted_voters + " / " + get_players().size + " Players Accepted.", 1, 52, 0 );
-            self vote_text("                             ^2Accepted", 1, 149, 0 );
+			foreach(player in level.players)
+			{
+				player.huds["voters"] destroy();
+			}
+			foreach(hud in self.vote_text)
+			{
+				hud destroy();
+			}
+            self vote_text(user.name, 1, 52, -168 );
+            self vote_text(" WANTS TO TELEPORT SAFE AREA", 1, 124, -168 );
+    		foreach(player in level.players)
+			{
+				if(level.accepted_voters == get_players().size)
+				{
+					player vote_text("^2" + level.accepted_voters + " / " + get_players().size + " Players Accepted.", 1, 52, -150 );
+				}
+				else
+				{
+	            	player vote_text("^1" + level.accepted_voters + " / " + get_players().size + " Players Accepted.", 1, 52, -150 );
+				}
+			}
+            self vote_text("                             ^2Accepted", 1, 149, -150 );
             wait 1;
             break;
         }
         if(self actionSlotTwoButtonPressed())
         {
+			foreach(player in level.players)
+			{
+				player.huds["voters"] destroy();
+			}
             foreach(hud in self.vote_text)
             {
                 hud destroy();
             }
-            self vote_text(user.name, 1, 52, -18 );
-            self vote_text(" WANTS TO TELEPORT SAFE AREA", 1, 124, -18 );
-            self vote_text("^1" + level.accepted_voters + " / " + get_players().size + " Players Accepted.", 1, 52, 0 );
-            self vote_text("                             ^1Declined", 1, 149, 0 );
-            wait 2;
-			self destroy_all_huds();
-			i = 100;
+            self vote_text(user.name, 1, 52, -168 );
+            self vote_text(" WANTS TO TELEPORT SAFE AREA", 1, 124, -168 );
+			foreach(player in level.players)
+			{
+	            player vote_text("^1" + level.accepted_voters + " / " + get_players().size + " Players Accepted.", 1, 52, -150 );
+			}
+            self vote_text("                             ^1Declined", 1, 149, -150 );
+            wait 1;
             break;
         }
 		if(i == 100)
@@ -283,26 +347,23 @@ vote_bar(user)
 			wait .01;
 		}
 	}
-	else
-	{
-		players = get_players();
-		if(level.accepted_teleport == 0)
-		{
-			if(user == self)
-			{
-				self.score += 5000;
-			}
-		}
-		for( i = 0; i < players.size; i++ )
-		{
-			if(players[i].accepted_teleport)
-			{
-				players[i].accepted_teleport = 0;
-				players[i] thread safe_area_tele(i);
-			}
-		}
-		self destroy_all_huds();
-	}
+    players = get_players();
+    if(level.accepted_voters == 0)
+    {
+        user.score += 5000;
+    }
+    else
+    {
+        for( i = 0; i < players.size; i++ )
+        {
+            if(players[i].accepted_teleport)
+            {
+                players[i].accepted_teleport = 0;
+                players[i] thread safe_area_tele(i);
+            }
+        }
+    }
+    self destroy_all_huds();
 	level.teleporter_in_use = 0;
 }
 
@@ -316,17 +377,6 @@ destroy_all_huds()
 	{
 		hud destroy();
 	}
-}
-
-safe_area_tele(i)
-{
-	self enableinvulnerability();
-	self thread teleport_effect();
-	self SetOrigin(level.failsafespawns[i]);
-	wait 2;
-	self SetOrigin(level.safezonespawns[i]);
-	self thread timer();
-	self disableinvulnerability();
 }
 
 vote_shader(shader, width, height, alpha, x, y)
@@ -355,6 +405,64 @@ vote_text(text, alpha, x, y)
 	vote_bar_text.x = x;
 	vote_bar_text.y = y;
     self.vote_text[self.vote_text.size] = vote_bar_text;
+}
+
+quick_revive_machine(origin, angles)
+{
+    level.solo_revives = 0;
+	models = spawn( "script_model", origin);
+	models setmodel( "zombie_vending_revive_on" );
+	models.angles = angles;
+    collision = spawn( "script_model", origin );
+	collision setmodel( "zm_collision_perks1" );
+	collision.angles = angles;
+    trigger = spawn( "trigger_radius", origin, 0, 35, 30 );
+    trigger setcursorhint( "HINT_NOICON" );
+	models thread play_fx( "revive_light" );
+	for( ;; )
+	{
+        if(get_players().size > 1)
+		{
+			trigger sethintstring( "Hold ^3&&1^7 for Revive [Cost: 1500]" );
+            cost = 1500;
+            level.solo_revives = 0;
+		}
+		else
+		{
+			trigger sethintstring( "Hold ^3&&1^7 for Revive [Cost: 500]" );
+            cost = 500;
+        }
+		trigger waittill("trigger", player);
+        if(player usebuttonpressed() && player.score >= cost && player can_buy()) 
+		{
+			if(!player hasperk( "specialty_quickrevive" ) && level.solo_revives < 3)
+            {
+                if(get_players().size < 2)
+                {
+                    level.solo_revives++;
+                }
+                player thread DoGivePerk("specialty_quickrevive");
+                player playsound( "zmb_cha_ching" );
+                player.score -= cost;
+                player playsound ( "mus_perks_revive_sting" );
+                wait 3;
+            }
+            else if(level.solo_revives == 3) 
+            {
+                player iprintln("you have bought 3 revives already.");
+                player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "oh_shit" );
+                wait 3;
+            }
+		}
+		else 
+		{
+			if(player usebuttonpressed() && player.score < cost)
+			{
+				player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "perk_deny", undefined, 0 );
+			}
+		}
+	wait 0.1;
+	}
 }
 
 zombie_fail_safe()
@@ -386,7 +494,7 @@ monitor_life()
 		}
 		wait 1;
 	}
-	self dodamage(self.maxhealth * 2, (0,0,0));
+	self dodamage(self.maxhealth + 666,(0,0,0));
 	self delete();
 }
 
@@ -444,10 +552,10 @@ lag_failsafe()
     teleport = getent( "bus_roof_watch", "targetname" );
 	for(;;)
 	{
-		if(distance((10180, 8716, 970), self.origin) > 500 && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
-		{
-			self setorigin((teleport.origin - (0,0,150)));
-		}
+        if(!self.isinsafearea && distance((level.the_bus.origin), self.origin) > 400 && distance((-6814, 5176, -55), self.origin) > 400)
+        {
+            self setorigin((teleport.origin - (0,0,150)));
+        }
 		wait .1;
 	}
 }
@@ -466,30 +574,7 @@ teleport_avogadro()
 				zombie forceteleport(( 1588.01, 62.551, 1000.875 ));
 			}
 		}
-		wait .3;
-	}
-}
-
-portal()
-{
-    teleport = getent( "bus_roof_watch", "targetname" );
-	while(1)
-	{
-		foreach(player in level.players)
-		{
-            player.cooldowntime = 0;
-			if(distance(( 10100, 8525, 960 ), player.origin) <= 40 && !player.cooldowntime)
-			{
-				player.cooldowntime = 1;
-				wait .1;
-				player setorigin((teleport.origin - (0,0,150)));
-                player.teleported = 1;
-				wait .1;
-				player.cooldowntime = 0;
-			}
-			wait .1;
-		}
-        wait .1;
+		wait 0.3;
 	}
 }
 
@@ -579,6 +664,7 @@ remove()
 timer()
 {
     flag_wait( "initial_blackscreen_passed" );
+    teleport = getent( "bus_roof_watch", "targetname" );
 	if(isdefined(self.timer))
 	{
 		return;
@@ -596,7 +682,8 @@ timer()
 		}
         if(i == 0)
         {
-		    self setorigin((level.the_bus.origin + (0,0,20)));
+            self.isinsafearea = 0;
+			self setorigin((teleport.origin - (0,0,150)));
         }
         if(self.teleported)
         {
@@ -610,101 +697,430 @@ timer()
 
 safe_area()
 {	
-	collision( "script_model", (10100, 8550, 960.125), "", ( 0, 0, 0 ), "teleport" ); //teleport portal
-
-	collision( "script_model", (10406, 8516, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	collision( "script_model", (10271, 8515, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	collision( "script_model", (10136, 8513, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	collision( "script_model", (10005, 8512, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	collision( "script_model", (10120, 8535, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	//box wall
-	collision( "script_model", (10404, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-	collision( "script_model", (10403, 8776, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-	collision( "script_model", (10402, 8911, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-	collision( "script_model", (10401, 9046, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 180, 0 ) ); 
-	collision( "script_model", (10370, 8780, 1045), "collision_wall_512x512x10_standard", ( 0, 90, 0 ) ); 
-	collision( "script_model", (10267, 9047, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (10131, 9046, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (9997, 9045, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (9868, 9044, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (9732, 9043, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (9597, 9042, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (9462, 9041, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (9327, 9040, 970), "p6_zm_bank_vault_floor_hatch", ( 90, -90, 0 ) ); 
-	collision( "script_model", (10130, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9880, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9680, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9600, 9035, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9810, 8911, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-	collision( "script_model", (9811, 8776, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-	collision( "script_model", (9812, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-	collision( "script_model", (9813, 8776, 1045), "collision_wall_512x512x10_standard", ( 0, 90, 0 ) ); 
-	collision( "script_model", (9462, 8641, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	collision( "script_model", (9597, 8642, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	collision( "script_model", (9733, 8643, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 90, 0 ) ); 
-	collision( "script_model", (9768, 8645, 1070), "p6_zm_bank_vault_floor_hatch", ( 0, 180, 90 ) ); 
-	collision( "script_model", (9768, 8644, 935), "p6_zm_bank_vault_floor_hatch", ( 0, 180, 90 ) ); 
-	collision( "script_model", (9533, 8655, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9633, 8655, 1045), "collision_wall_512x512x10_standard", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9869, 8520, 970), "p6_zm_bank_vault_floor_hatch", ( 90, 0, 0 ) ); 
-	collision( "script_model", (9890, 8592, 1045), "collision_wall_128x128x10_standard", ( 0, 90, 0 ) ); 
-
-	//floor 
-	collision( "script_model", (10280, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10280, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10280, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10280, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10045, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10045, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10045, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10045, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9810, 8516, 950), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9810, 8641, 949), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9810, 8776, 948), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (9810, 8911, 947), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 0 ) ); 
-	collision( "script_model", (10130, 8780, 955), "collision_wall_512x512x10_standard", ( 0, 0, 90 ) ); 
-	collision( "script_model", (9630, 8780, 955), "collision_wall_512x512x10_standard", ( 0, 0, 90 ) ); 
-
-	//roof 
-	collision( "script_model", (10280, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (10280, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (10280, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (10280, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (10045, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (10045, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (10045, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (10045, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (9810, 9047, 1100), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (9810, 8641, 1103), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (9810, 8776, 1102), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	collision( "script_model", (9810, 8911, 1101), "p6_zm_bank_vault_floor_hatch", ( 0, 0, 180 ) ); 
-	
-	perk_system( "script_model", (9885, 8592, 965), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "random", "mus_perks_speed_sting", "Random Perk", 1500, "jugger_light" );
-	perk_system( "script_model", ( 10250, 8552, 960 ), "p6_anim_zm_buildable_pap_on", ( 0, 180, 0 ), "pap", "zmb_perks_packa_upgrade", "Pack-A-Punch", 5000 );
-	perk_system( "script_model", (9840, 8705, 965), "zombie_vending_revive_on", ( 0, 90, 0 ), "revive" );
-	perk_system( "script_model", (9840, 8765, 965), "zombie_vending_jugg_on", ( 0, 90, 0 ), "original", "mus_perks_jugganog_sting", "Jugger-Nog", 2500, "jugger_light", "specialty_armorvest" );
-	perk_system( "script_model", (9840, 8825, 965), "zombie_vending_marathon_on", ( 0, 90, 0 ), "original", "mus_perks_stamin_sting", "Stamin-Up", 2000, "marathon_light", "specialty_longersprint" );
-	perk_system( "script_model", (9840, 8895, 965), "zombie_vending_sleight_on", ( 0, 90, 0 ), "original", "mus_perks_speed_sting", "Speed Cola", 3000, "sleight_light", "specialty_fastreload" );
-	perk_system( "script_model", (9830, 8970, 965), "zombie_vending_doubletap2_on", ( 0, 90, 0 ), "original", "mus_perks_doubletap_sting", "Double Tap Root Beer", 2000, "doubletap_light", "specialty_rof" );
-	perk_system( "script_model", ( 9915, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_deadshot_sting", "Widow's Wine", 4000, "tombstone_light", "WIDOWS_WINE" );
-	perk_system( "script_model", ( 9985, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_packa_sting", "Electric Cherry", 2000, "tombstone_light", "ELECTRIC_CHERRY" );
-	perk_system( "script_model", ( 10055, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Ethereal Razor", 4000, "tombstone_light", "Ethereal_Razor" );
-	perk_system( "script_model", ( 10125, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Mule Kick", 4000, "tombstone_light", "MULE" );
-	perk_system( "script_model", ( 10195, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_packa_sting", "PhD Flopper", 2000, "tombstone_light", "PHD_FLOPPER" );
-	perk_system( "script_model", ( 10265, 9030, 965 ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Downer's Delight", 2500, "tombstone_light", "Downers_Delight" );
-	perk_system( "script_model", ( 10335, 9030, 965  ), "zombie_vending_tombstone_on", ( 0, 0, 0 ), "custom", "mus_perks_doubletap_sting", "Dying Wish", 5000, "tombstone_light", "Dying_Wish" );
-	perk_system( "script_model", ( 10380, 8740, 965  ), "zombie_vending_tombstone_on", ( 0, -90, 0 ), "custom", "mus_perks_doubletap_sting", "Ammo Regen", 2500, "marathon_light", "Ammo_Regen" );
-	perk_system( "script_model", ( 10380, 8670, 965  ), "zombie_vending_tombstone_on", ( 0, -90, 0 ), "custom", "mus_perks_deadshot_sting", "Deadshot", 2000, "revive_light", "deadshot" );
+    collision( (-6841.33, 5089.87, 4562.69), "p6_zm_sign_terminal", (0, 360, 0) ); 
+    collision( (-6862.12, 4831.83, 4452.69), "p6_zm_kiosk", (1, 214, 1) ); 
+    collision( (-7406.19, 4927.09, 4472.69), "p6_anim_zm_magic_box_fake", (0, 300, -180) ); 
+    collision( (-6923.68, 4837.88, 4457.56), "collision_wall_512x512x10_standard", (0, 0, 90) ); 
+    collision( (-7443.68, 4837.88, 4457.56), "collision_wall_512x512x10_standard", (0, 0, 90) ); 
+    collision( (-7686.76, 4761.88, 4462.69), "collision_wall_512x512x10_standard", (0, 90, 0) ); 
+    collision( (-7586.76, 5031.88, 4462.69), "collision_wall_512x512x10_standard", (0, 0, 0) ); 
+    collision( (-7465.06, 5046.51, 4462.69), "collision_wall_512x512x10_standard", (0, 120, 0) ); 
+    collision( (-7465.06, 5046.51, 4462.69), "collision_wall_128x128x10_standard", (0, 0, 0) ); 
+    collision( (-6972.38, 5072.97, 4462.69), "collision_wall_256x256x10_standard", (0, 270, 0) ); 
+    collision( (-7086.47, 4882.66, 4462.69), "collision_wall_256x256x10_standard", (0, 30, 0) ); 
+    collision( (-7249.85, 4628.58, 4462.69), "collision_wall_512x512x10_standard", (0, 180, 0) ); 
+    collision( (-6939.85, 4628.58, 4462.69), "collision_wall_512x512x10_standard", (0, 180, 0) ); 
+    collision( (-6799.85, 5090.58, 4462.69), "collision_wall_512x512x10_standard", (0, 0, 0) ); 
+    collision( (-6664.85, 4885.58, 4462.69), "collision_wall_512x512x10_standard", (0, 90, 0) );
+    collision( (-7274.24, 4823.45, 4462.69), "collision_wall_128x128x10_standard", (0, 0, 0) );
+    collision( (-6831.53, 4841.79, 4482.69), "zm_collision_perks1", (0, 210, 0) ); 
+    collision( (-6891.53, 4806.79, 4482.69), "zm_collision_perks1", (0, 210, 0) ); 
+    collision( (-7567.2, 4414.03, 4272.69), "collision_wall_512x512x10_standard", (0, 0, -40) );
+	collision( (-7476.97, 4049.26, 4147.33), "collision_wall_512x512x10_standard", (0, 180, -90) ); //x
+	collision( (-7502.63, 4550.63, 4369.57), "collision_wall_256x256x10_standard", (40, 90, 0) );
+	collision( (-7208.37, 4009.68, 4147.79), "collision_wall_512x512x10_standard", (0, 90, 0) );//
+	collision( (-7248.37, 4269.68, 4147.79), "collision_wall_512x512x10_standard", (0, 180, 0) );
+	collision( (-7418.09, 3798.08, 4149.45), "collision_wall_512x512x10_standard", (0, 0, 0) );
+	collision( (-7508.92, 4409.99, 4472.46), "collision_wall_256x256x10_standard", (0, 90, 0) );
+	collision( (-7508.92, 4409.99, 4302.46), "collision_wall_256x256x10_standard", (0, 90, 0) );
+	collision( (-7687.82, 4490.24, 4430.37), "collision_wall_512x512x10_standard", (0, 90, 0) );
+    collision( (-7203.51, 5059.31, 4552.56), "p6_zm_building_rundown_03", (-90, -510, -150) ); 
+    collision(  (-7095.51, 4758.31, 4227.56), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-6771.51, 4758.31, 4227.56), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-6771.51, 4996.31, 4229.56), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-7095.51, 4996.31, 4229.56), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-6955.51, 5326.31, 4559.56), "p6_zm_building_rundown_03", (0, -180, -60) ); 
+	collision( (-6631.51, 5326.31, 4559.56), "p6_zm_building_rundown_03", (0, -180, -60) ); 
+	collision( (-6431.51, 4866.31, 4559.56), "p6_zm_building_rundown_03", (0, -270, -60)); 
+	collision( (-6431.51, 4542.31, 4559.56), "p6_zm_building_rundown_03", (0, -270, -60) ); 
+	collision( (-6899.51, 4392.31, 4559.56), "p6_zm_building_rundown_03", (0, -360, -60) ); 
+	collision( (-6955.51, 5326.31, 4559.56), "p6_zm_building_rundown_03", (0, -180, -60) ); 
+	collision( (-7223.51, 4392.31, 4559.56), "p6_zm_building_rundown_03", (0, -360, -60) ); 
+	collision( (-6893.51, 4732.31, 4919.56), "p6_zm_building_rundown_03", (0, -360, -150) ); 
+	collision( (-6893.51, 4972.31, 4921.56), "p6_zm_building_rundown_03", (0, -360, -150) ); 
+	collision( (-7213.51, 5082.31, 4551.56), "p6_zm_building_rundown_03", (-90, -420, -150) ); 
+	collision( (-7183.51, 4862.31, 4801.56), "p6_zm_building_rundown_03", (0, -450, -150) ); 
+	collision( (-7419.95, 4739.7, 4226.69), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-7606.13, 4542.45, 4855.69), "p6_zm_building_rundown_03", (180, 180, 390) ); 
+	collision( (-7743.95, 4739.7, 4226.69), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-7743.95, 4979.7, 4228.69), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-7419.95, 4979.7, 4228.69), "p6_zm_building_rundown_03", (0, 0, 30) ); 
+	collision( (-7679.95, 5259.7, 4588.69), "p6_zm_building_rundown_03", (0, 0, 120) ); 
+	collision( (-7916.13, 4791.45, 4582.69), "p6_zm_building_rundown_03", (0, 90, 120) ); 
+	collision( (-7916.13, 4467.45, 4582.69), "p6_zm_building_rundown_03", (0, 90, 120) ); 
+	collision( (-7186.13, 4862.45, 4777.69), "p6_zm_building_rundown_03", (180, 90, 300) ); 
+	collision( (-7526.13, 4942.45, 4917.69), "p6_zm_building_rundown_03", (180, 90, 390) ); 
+	collision( (-7756.13, 4942.45, 4915.69), "p6_zm_building_rundown_03", (180, 90, 390) ); 
+	collision( (-7416.13, 4392.45, 4565.69), "p6_zm_building_rundown_03", (180, 180, 480) ); 
+	collision( (-7525.23, 4669.61, 4197.69), "p6_zm_building_rundown_03", (0, -180, -14) ); 
+	collision( (-7525.23, 4499.61, 4035.69), "p6_zm_building_rundown_03", (0, -180, -14) );
+	collision( (-7200.23, 4169.61, 3905.69), "p6_zm_building_rundown_03", (0, -180, 26) );
+	collision( (-7655.23, 4199.61, 4645.69), "p6_zm_building_rundown_03", (-180, -180, 86) );
+	collision( (-7916.23, 4509.61, 4363.69), "p6_zm_building_rundown_03", (-180, -270, 120) );
+	collision( (-7276.23, 4389.61, 4483.69), "p6_zm_building_rundown_03", (-180, -90, 120) );
+	collision( (-7276.23, 4359.61, 4243.69), "p6_zm_building_rundown_03", (-180, -90, 120) );
+	collision( (-7276.23, 4499.61, 4243.69), "p6_zm_building_rundown_03", (-180, 0, 120) );
+	collision( (-7915.23, 4291.61, 4243.69), "p6_zm_building_rundown_03", (-180, 90, 120) );
+	collision( (-6976.23, 3789.61, 4243.69), "p6_zm_building_rundown_03", (-180, 270, 120) );
+	collision( (-7768.23, 3559.61, 4243.69), "p6_zm_building_rundown_03", (-180, 180, 120) );
+	collision( (-7604.23, 4133.61, 4545.69), "p6_zm_building_rundown_03", (180, -180, 30) );
+	collision( (-7270.23, 4133.61, 4545.69), "p6_zm_building_rundown_03", (180, -180, 30) );
+	collision( (-7270.23, 3903.61, 4543.69), "p6_zm_building_rundown_03", (180, -180, 30) );
+	collision( (-7593.23, 3893.61, 4543.69), "p6_zm_building_rundown_03", (180, -180, 30) );
+	collision( (-7666.93, 4170.39, 3911.46), "p6_zm_building_rundown_03", (0, 0, 30) );
+	collision( (-7666.93, 3930.39, 3910.46), "p6_zm_building_rundown_03", (0, 0, 30) );
+	collision( (-7346.93, 4175.39, 3911.46), "p6_zm_building_rundown_03", (0, 0, 30) );
+	collision( (-7346.93, 3931.39, 3910.46), "p6_zm_building_rundown_03", (0, 0, 30) );
+	collision( (-7443.4, 3559.94, 4202.46), "p6_zm_building_rundown_03", (0, 0, -60) );
+	collision( (-6976.4, 4059.94, 4202.46), "p6_zm_building_rundown_03", (0, 90, -60) );
+    thread quick_revive_machine( (-6696.24, 4651.27, 4460.69), (0, 230, 0));	
+	thread perk_system( (-6669.36, 4859.19, 4461.69), "zombie_vending_doubletap2_on", (0, -90, 0), "original", "mus_perks_doubletap_sting", "Double Tap Root Beer", 2000, "doubletap_light", "specialty_rof" );
+	thread perk_system( (-6687.09, 5069.7, 4462.69), "zombie_vending_jugg_on", (0, -50, 0), "original", "mus_perks_jugganog_sting", "Jugger-Nog", 2500, "jugger_light", "specialty_armorvest" );
+	thread perk_system( (-7020.72, 4626.85, 4458.69), "zombie_vending_tombstone_on", (0, 180, 0), "custom", "mus_perks_doubletap_sting", "Downer's Delight", 2500, "tombstone_light", "Downers_Delight" );
+	thread perk_system( (-6980.72, 5026.85, 4458.69), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "random", "mus_perks_speed_sting", "Random Perk", 1500, "jugger_light" );
+    thread perk_system( (-7674.64, 4747.61, 4462.69), "zombie_vending_tombstone_on", (0, 90, 0), "custom", "mus_perks_doubletap_sting", "Ammo Regen", 2500, "marathon_light", "Ammo_Regen" );
+	thread perk_system( (-7674.38, 4637.78, 4462.69), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "custom", "mus_perks_deadshot_sting", "Deadshot", 2000, "revive_light", "deadshot" );
+	thread perk_system( (-7675.7, 4854.52, 4462.69), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "custom", "mus_perks_packa_sting", "PhD Flopper", 2000, "tombstone_light", "PHD_FLOPPER" );
+	thread perk_system( (-7399.29, 4627.39, 4462.69), "zombie_vending_tombstone_on", ( 0, 180, 0 ), "custom", "mus_perks_packa_sting", "Electric Cherry", 2000, "tombstone_light", "ELECTRIC_CHERRY" );
+	thread perk_system( (-7677.06, 4976.05, 4462.69), "zombie_vending_tombstone_on", ( 0, 90, 0 ), "custom", "mus_perks_doubletap_sting", "Ethereal Razor", 4000, "tombstone_light", "Ethereal_Razor" );
+    thread perk_system( ( -7249.01, 3839.83, 4142.46 ), "p6_anim_zm_buildable_pap_on", ( 0, 230, 0 ), "pap", "zmb_perks_packa_upgrade", "Pack-A-Punch", 5000 );
+	thread perk_system( (-7219.01, 4211.61, 4142.46), "zombie_vending_marathon_on", ( 0, -90, 0 ), "original", "mus_perks_stamin_sting", "Stamin-Up", 2000, "marathon_light", "specialty_longersprint" );
+	thread perk_system( (-7225.01, 4107.22, 4142.46), "zombie_vending_sleight_on", ( 0, -90, 0 ), "original", "mus_perks_speed_sting", "Speed Cola", 3000, "sleight_light", "specialty_fastreload" );
+	thread perk_system( ( -7219.01, 4002.95, 4142.46 ), "zombie_vending_tombstone_on", ( 0, -90, 0 ), "custom", "mus_perks_deadshot_sting", "Widow's Wine", 4000, "tombstone_light", "WIDOWS_WINE" );
+	thread perk_system( ( -7409.01, 3802.95, 4142.46 ), "zombie_vending_tombstone_on", ( 0, -180, 0 ), "custom", "mus_perks_doubletap_sting", "Mule Kick", 4000, "tombstone_light", "MULE" );
+	thread perk_system( ( -7519.01, 3802.95, 4142.46  ), "zombie_vending_tombstone_on", ( 0, -180, 0 ), "custom", "mus_perks_doubletap_sting", "Dying Wish", 5000, "tombstone_light", "Dying_Wish" );
+	level thread DoorToSecondRoom();
+	level thread ReapersEE();
+	level thread FirstPortal();
+	level thread SecondPortal();
+	level thread DoorTo3rdRoom();
 }
 
-collision( script, pos, model, angles, type )
+collision(pos, model, angles)
 {
-	col = spawn( script, pos );
+	col = spawn( "script_model", pos );
 	col setmodel( model );
 	col.angles = angles;
-    if(type == "teleport")
+}
+
+SecondPortal()
+{
+    x = randomfloatrange(-30, -40);
+    y = randomfloatrange(10, 20);
+    teleport = getent( "bus_roof_watch", "targetname" );
+	while(1)
+	{
+		foreach(player in level.players)
+		{
+            player.cooldowntime = 0;
+			if(distance(( -7439.11, 4038.77, 4140.46 ), player.origin) <= 50 && !player.cooldowntime)
+			{
+				player.cooldowntime = 1;
+				wait .1;
+				player setorigin((teleport.origin - (0,0,150)));
+                player.isinsafearea = 0;
+                player.teleported = 1;
+				wait .1;
+				player.cooldowntime = 0;
+			}
+			wait .1;
+		}
+        wait .1;
+	}
+}
+
+FirstPortal()
+{
+    x = randomfloatrange(-30, -40);
+    y = randomfloatrange(10, 20);
+    teleport = getent( "bus_roof_watch", "targetname" );
+	while(1)
+	{
+		foreach(player in level.players)
+		{
+            player.cooldowntime = 0;
+			if(distance(( -6854.65, 5078.87, 4500.69 ), player.origin) <= 80 && !player.cooldowntime)
+			{
+				player.cooldowntime = 1;
+				wait .1;
+				player setorigin((teleport.origin - (0,0,150)));
+                player.isinsafearea = 0;
+                player.teleported = 1;
+				wait .1;
+				player.cooldowntime = 0;
+			}
+			wait .1;
+		}
+        wait .1;
+	}
+}
+
+ReapersEE()
+{
+	level.teddysforee = 0;
+	RoomWallBefore = spawn( "script_model", (-7915.23, 3967.61, 4243.69));
+	RoomWallBefore.angles = (-180, 90, 120);
+	RoomWallBefore setmodel("p6_zm_building_rundown_03");
+	RoomWallCollision = spawn( "script_model", (-7687.73, 3953.55, 4152.46));
+	RoomWallCollision.angles = (0, 90, 0);
+	RoomWallCollision setmodel("collision_wall_512x512x10_standard");
+	RoomWall = spawn( "script_model", (-7763.09, 3971.66, 4545.46));
+	RoomWall.angles = (0, 268, -210);
+	RoomWall setmodel("p6_zm_building_rundown_01");
+	RoomWall2 = spawn( "script_model", (-7763.09, 4291.66, 4270.46));
+	RoomWall2.angles = (0, 178, -120);
+	RoomWall2 setmodel("p6_zm_building_rundown_01");
+	RoomWall3 = spawn( "script_model", (-8077.09, 4001.66, 4270.46));
+	RoomWall3.angles = (0, 270, -120);
+	RoomWall3 setmodel("p6_zm_building_rundown_01");
+	RoomWall4 = spawn( "script_model", (-7857.09, 4001.66, 3910.46));
+	RoomWall4.angles = (0, 270, 30);
+	RoomWall4 setmodel("p6_zm_building_rundown_01");
+	Wall = spawn( "script_model", (-7367.36, 4154.97, 4592.46));
+	Wall.angles = (0, 0, 210);
+	Wall setmodel("p6_zm_building_rundown_01");	
+	Teddy = spawn( "script_model", (-7363, 4269.04, 4342.46));
+	Teddy.angles = (60, -90, 0);
+	Teddy setmodel("zombie_teddybear");
+	Teddy setcandamage( 1 );
+	Teddy.health = 1;
+	Teddy thread ShootMePlease();
+	Teddy2 = spawn( "script_model", (-6811.47, 4862.49, 4597.69));
+	Teddy2.angles = (0, -30, 0);
+	Teddy2 setmodel("zombie_teddybear");
+	Teddy2 setcandamage( 1 );
+	Teddy2.health = 1;
+	Teddy2 thread ShootMePlease();
+	level.zmb_laugh_alias = "zmb_laugh_richtofen";
+	while(1)
+	{
+		if(level.teddysforee == 2)
+		{
+			NewCollision = spawn( "script_model", (-7687.91, 4189.71, 4152.46));
+			NewCollision.angles = (0, 90, 0);
+			NewCollision setmodel("collision_wall_256x256x10_standard");
+			NewColl = spawn( "script_model", (-7670.53, 3927.05, 4142.46));
+			NewColl.angles = (0, 90, -90);
+			NewColl setmodel("collision_wall_512x512x10_standard");
+			NewColl2 = spawn( "script_model", (-7845.29, 3926.55, 4147.58));
+			NewColl2.angles = (0, 90, 0);
+			NewColl2 setmodel("collision_wall_256x256x10_standard");
+			NewColl3 = spawn( "script_model", (-7815.29, 3796.55, 4147.58));
+			NewColl3.angles = (0, 180, 0);
+			NewColl3 setmodel("collision_wall_256x256x10_standard");
+			NewColl4 = spawn( "script_model", (-7815.29, 4056.55, 4147.58));
+			NewColl4.angles = (0, 180, 0);
+			NewColl4 setmodel("collision_wall_256x256x10_standard");
+			NewColl5 = spawn( "script_model", (-7670.53, 3927.05, 4142.46));
+			NewColl5.angles = (0, 90, -90);
+			NewColl5 setmodel("collision_wall_512x512x10_standard");
+			RaygunAltar = spawn( "script_model", (-7784.8, 3927.58, 4166.46));
+			RaygunAltar.angles = (90, 0, 0);
+			RaygunAltar setmodel("p6_zm_buildable_jetgun_engine");
+			RaygunModel = spawn( "script_model", (-7777.9, 3927.58, 4208.46));
+			RaygunModel.angles = (0, 0, 0);
+			RaygunModel setmodel("t6_wpn_zmb_raygun_view");
+			RaygunModel thread WobbleMe();
+			playfx(level._effect[ "richtofen_sparks" ], (-7777.9, 3927.58, 4208.46) );
+			RoomWallBefore delete();
+			RoomWallCollision delete();
+			level thread SpawnTheRaygunTrigg();
+			break;
+		}
+		wait 1;
+	}
+}
+
+SpawnTheRaygunTrigg()
+{
+	Trigg = spawn("trigger_radius", (-7784.8,3927.58, 4166.46), 1, 45, 45);
+	Trigg SetCursorHint( "HINT_NOICON" );
+	Trigg SetHintString(&"ZOMBIE_WEAPONCOSTAMMO", "^2Ray Gun^7", 2500 + "   Weapon Cost [^210000^7");
+	while(1)
+	{
+		Trigg waittill("trigger", i);
+		if(i usebuttonpressed())
+		{
+			if(i hasweapon( "ray_gun_zm" ) || i hasweapon("ray_gun_upgraded_zm"))
+			{
+				if(i.score >= 2500)
+				{
+					weapona = i getcurrentweapon();
+					if(weapona == "ray_gun_zm" || weapona == "ray_gun_upgraded_zm" )
+					{
+            			stockmax = 0;
+               	 		stockmax = weaponstartammo(weapona);
+               	 		clipmax = weaponclipsize(weapona);
+                		ammocount = i getammocount(weapona);
+                		clipcount = i getweaponammoclip(weapona);
+        				if ((ammocount - clipcount) < stockmax) 
+                		{
+                    		i.score -= 2500;
+                    		i playsound( "zmb_cha_ching" );
+                    		i GiveMaxAmmo(weapona);
+                		} 
+                		wait 1;
+                	}
+				}
+				else
+                {
+					i playsound("evt_perk_deny");
+					wait 1;
+				}
+			}
+			else
+            {
+				if(i.score >= 10000)
+				{
+					weapona = i getcurrentweapon();
+					a_weapons = i getweaponslistprimaries();
+					if(a_weapons.size >= get_player_weapon_limit( i ) )
+					{
+						i takeweapon( weapona );
+					}
+					i giveweapon("ray_gun_zm");
+					i switchtoweapon("ray_gun_zm");
+					i.score -= 10000;
+					weapona = i getcurrentweapon();
+					i GiveMaxAmmo(weapona);
+					i playsound( "zmb_cha_ching" );
+					wait 1;
+				}
+				else
+                {
+					i playsound("evt_perk_deny");
+					wait 1;
+				}
+			}
+		}
+	}
+}
+
+WobbleMe()
+{
+	while ( isDefined( self ) )
+	{
+		waittime = randomfloatrange( 2.5, 5 );
+		yaw = randomint( 360 );
+		if ( yaw > 300 )
+		{
+			yaw = 300;
+		}
+		else
+		{
+			if ( yaw < 60 )
+			{
+				yaw = 60;
+			}
+		}
+		yaw = self.angles[ 1 ] + yaw;
+		new_angles = ( -60 + randomint( 120 ), yaw, -45 + randomint( 90 ) );
+		self rotateto( new_angles, waittime, waittime * 0.5, waittime * 0.5 );
+		if ( isDefined( self.worldgundw ) )
+		{
+			self.worldgundw rotateto( new_angles, waittime, waittime * 0.5, waittime * 0.5 );
+		}
+		wait randomfloat( waittime - 0.1 );
+	}
+}
+
+safe_area_tele(i)
+{
+    self.isinsafearea = 1;
+	self enableinvulnerability();
+	self thread fadetoblackforxsec( 0, 2, 1, 1, "black" );
+	wait 1.1;
+	self SetOrigin(level.failsafespawns[i]);
+	wait 0.8;
+	self SetOrigin(level.safezonespawns[i]);
+	self thread timer();
+	self disableinvulnerability();
+}
+
+ShootMePlease()
+{
+	while(1)
+	{
+		self waittill( "damage");
+		foreach(player in level.players)
+		{
+			player playlocalsound( level.zmb_laugh_alias );
+		}
+		self delete();
+		level.teddysforee += 1;
+		break;
+	}
+}
+
+DoorTo3rdRoom()
+{
+	Coll = spawn( "script_model", (-7575.61, 4586.02, 4462.69));
+	Coll.angles = (0, -11, 0);
+	Coll setmodel("collision_wall_128x128x10_standard");
+	Wall = spawn( "script_model", (-7583.68, 4605.91, 4458.69));
+	Wall.angles = (8, -10, 20);
+	Wall setmodel("p6_zm_quarantine_fence_03");
+	triggerDoor = spawn( "trigger_radius", (-7583.68, 4605.91, 4458.69), 1, 50, 50);
+    triggerDoor SetCursorHint( "HINT_NOICON" );
+    triggerDoor SetHintString(&"ZOMBIE_BUTTON_BUY_CLEAR_DEBRIS_COST", "6000");
+    while ( 1 )
     {
-        col thread portal();
+        triggerDoor waittill("trigger", i);
+        if(i usebuttonpressed())
+        {
+        	if(i.score >= 6000)
+        	{
+        		i playsound( "zmb_cha_ching" );
+                i.score -= 6000;
+                triggerDoor delete();
+                Coll delete();
+                Wall delete();
+        	}
+        	else
+            {
+        		i playsound("evt_perk_deny");
+        	}
+        }
+    }
+}
+
+DoorToSecondRoom()
+{
+	Junk = spawn( "script_model", (-7287.96, 4624.24, 4492.69));
+	Junk.angles = (0, -180, 90);
+	Junk setmodel("p6_anim_zm_buildable_sq");
+	Junk2 = spawn( "script_model", (-7292.96, 4801.49, 4447.69));
+	Junk2.angles = (-15, 45, -15);
+	Junk2 setmodel("p6_anim_zm_buildable_pap");
+	Junk3 = spawn( "script_model", (-7297.96, 4754.98, 4512.69));
+	Junk3.angles = (0, 10, -10);
+	Junk3 setmodel("p6_zm_work_bench");
+	Coll = spawn( "script_model", (-7253.6, 4731.02, 4462.69));
+	Coll.angles = (0, 90, 0);
+	Coll setmodel("collision_wall_256x256x10_standard");
+	triggerDoor = spawn( "trigger_radius", (-7253.6, 4731.02, 4462.69), 1, 50, 50);
+    triggerDoor SetCursorHint( "HINT_NOICON" );
+    triggerDoor SetHintString(&"ZOMBIE_BUTTON_BUY_CLEAR_DEBRIS_COST", "5000");
+    while ( 1 )
+    {
+        triggerDoor waittill("trigger", i);
+        if(i usebuttonpressed())
+        {
+        	if(i.score >= 5000)
+        	{
+        		i playsound( "zmb_cha_ching" );
+                i.score -= 5000;
+                triggerDoor delete();
+                Junk delete();
+                Junk2 delete();
+                Junk3 delete();
+                Coll delete();
+        	}
+        	else
+            {
+        		i playsound("evt_perk_deny");
+        	}
+        }
     }
 }
 
@@ -742,16 +1158,16 @@ box_init()
     flag_wait( "initial_blackscreen_passed" );
     wait 15;
     self thread locked_box();
-    level.turret_location = level.the_bus worldtolocalcoords( level.the_bus.origin + (74,22,45)); //save turret location
-    level.turret_angles = level.the_bus.angles + (30, 0, 0); //save turret angles
+    //level.turret_location = level.the_bus worldtolocalcoords( level.the_bus.origin + (74,22,45)); //save turret location
+    //level.turret_angles = level.the_bus.angles + (30, 0, 0); //save turret angles
 	level.box_fx = level.the_bus worldtolocalcoords( level.the_bus.origin + (45,0,67));
 	level.box_weapon_model = level.the_bus worldtolocalcoords( level.the_bus.origin + (35,0,87));
 	box_stand = spawn("script_model", (0,0,30));
 	box_stand setmodel("p6_anim_zm_magic_box_fake");
 	box_stand linkto( level.the_bus, "", level.the_bus worldtolocalcoords( level.the_bus.origin + (30,0,47)), level.the_bus.angles + (180,90,0) );
-	box_collision = spawn( "script_model", (0,0,30) );
-	box_collision setmodel( "collision_clip_32x32x128" );
-	box_collision linkto( level.the_bus, "", level.the_bus worldtolocalcoords( level.the_bus.origin + (45,0,70)), level.the_bus.angles + (90,90,0) );
+	//box_collision = spawn( "script_model", (0,0,30) );
+	//box_collision setmodel( "collision_clip_32x32x128" );
+	//box_collision linkto( level.the_bus, "", level.the_bus worldtolocalcoords( level.the_bus.origin + (45,0,70)), level.the_bus.angles + (90,90,0) );
 	setdvar( "magic_chest_movable", "0" );
 	if ( !isDefined( level.magic_box_zbarrier_state_func ) )
 	{
@@ -987,7 +1403,7 @@ bus_treasure_chest_think()
 		{
 			play_sound_at_pos( "no_purchase", self.origin );
 			user maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "no_money_box" );
-			wait .1;
+			wait 0.1;
 			continue;
 		}
 		wait .05;
@@ -1397,181 +1813,75 @@ default_vending_precaching()
 	level._effect[ "Pack_a_Punch" ] = loadfx( "maps/zombie/fx_zombie_packapunch" ); 
 }
 
-perk_system( script, pos, model, angles, type, sound, name, cost, fx, perk)
+perk_system( origin, model, angles, type, sound, name, cost, fx, perk )
 {
-	col = spawn( script, pos);
-	col setmodel( model );
-	col.angles = angles;
-	x = spawn( script, pos );
-	x setmodel( "zm_collision_perks1" );
-	x.angles = angles;
-	if(type != "revive")
-	{
-    	col thread buy_system( perk, sound, name, cost, type );
-	}
-	if(type != "pap" && type != "revive" )
+    level endon( "game_ended" );
+    models = spawn( "script_model", origin);
+	models setmodel( model );
+	models.angles = angles;
+    collision = spawn( "script_model", origin );
+	collision setmodel( "zm_collision_perks1" );
+	collision.angles = angles;
+    trigger = spawn( "trigger_radius", origin, 0, 35, 40 );
+    trigger setcursorhint( "HINT_NOICON" );
+    trigger sethintstring( "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
+    if(type != "pap" )
     {
-        col thread play_fx( fx );
+        models thread play_fx( fx );
     }
-	if(type == "revive" )
-	{
-		col thread perksquickr();
-		col thread play_fx( "revive_light" );
-	}
-}
-
-buy_system( perk, sound, name, cost, type )
-{
-    self endon( "game_ended" );
-    while( 1 )
+    for( ;; )
     {
-        foreach( player in level.players )
+        trigger waittill("trigger", player);
+        if(type != "random" && type != "pap" && player can_buy() && player usebuttonpressed() && !player hascustomperk(perk) && !player hasperk(perk) && player.score >= cost )
         {
-            if(!player.machine_is_in_use)
-			{
-                if( distance( self.origin, player.origin ) <= 60 )
-                {
-			    	player thread SpawnHint( self.origin, 35, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for " + name + " [Cost: " + cost + "]" );
-                    
-					if(type != "random" && type != "pap" && player usebuttonpressed() && !player hascustomperk(perk) && !player hasperk(perk) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
-                    {
-                        player.machine_is_in_use = 1;
-                        player playsound( "zmb_cha_ching" );
-                        player.score -= cost;
-                        player playsound( sound );
-                        if(type == "custom")
-                        {
-				    	    player thread drawshader_and_shadermove( perk, 1, 0 );
-                        }
-                        else
-                        {
-                            player thread DoGivePerk(perk);
-                        }
-						wait 4;
-                    	player.machine_is_in_use = 0;
-					}
-                    if( type == "random" && !player.num_perks > 12 && player usebuttonpressed() && player can_buy_weapon() && ( player.score >= cost ) && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
-					{
-						level.machine_is_in_use = 1;
-						player playsound( "zmb_cha_ching" );
-						player.score -= cost;
-						player playsound ( "mus_perks_doubletap_sting" ); 
-						player thread give_random_perk(1);
-						wait 4;
-						player.machine_is_in_use = 0;
-					}
-					if(type == "random" && player.num_perks > 12 && player usebuttonpressed() && ( player.score >= cost ) )
-					{
-						player iprintln("you have all perks.");
-						wait 3;
-					}
-					currgun = player getcurrentweapon();
-					if(type == "pap" && player usebuttonpressed() && !is_weapon_upgraded(currgun) && can_upgrade_weapon(currgun) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
-                    {
-						player.machine_is_in_use = 1;
-                        player playsound( "zmb_cha_ching" );
-                        player.score -= cost;
-                        player playsound( sound );
-                        player takeweapon(currgun);
-                        gun = player maps/mp/zombies/_zm_weapons::get_upgrade_weapon( currgun, 0 );
-                        player giveweapon(player maps/mp/zombies/_zm_weapons::get_upgrade_weapon( currgun, 0 ), 0, player custom_get_pack_a_punch_weapon_options(gun));
-                        player switchToWeapon(gun);
-						playfx(loadfx( "maps/zombie/fx_zombie_packapunch"), ( 10250, 8552, 971  ), anglestoforward( ( 0, 270, 55  ) ) ); 
-						wait 3;
-                    	player.machine_is_in_use = 0;
-					}
-					else
-                    {
-                        if( player usebuttonpressed() && player.score < cost )
-                        {
-                            player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "perk_deny", undefined, 0 );
-                        }
-                    }
-                }
+            player playsound( "zmb_cha_ching" );
+            player.score -= cost;
+            player playsound( sound );
+            if(type == "custom")
+            {
+                player thread drawshader_and_shadermove( perk, 1, 0 );
+            }
+            else
+            {
+                player thread DoGivePerk(perk);
+            }
+            wait 4;
+        }
+        if( type == "random" && !player.num_perks > 12 && player usebuttonpressed() && player can_buy() && ( player.score >= cost ))
+        {
+            player playsound( "zmb_cha_ching" );
+            player.score -= cost;
+            player playsound ( "mus_perks_doubletap_sting" ); 
+            player thread give_random_perk(1);
+            wait 4;
+        }
+        if(type == "random" && player.num_perks > 12 && player usebuttonpressed() && ( player.score >= cost ) )
+        {
+            player iprintln("you have all perks.");
+            wait 3;
+        }
+        currgun = player getcurrentweapon();
+        if(type == "pap" && player usebuttonpressed() && !is_weapon_upgraded(currgun) && can_upgrade_weapon(currgun) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
+        {
+            player playsound( "zmb_cha_ching" );
+            player.score -= cost;
+            player playsound( sound );
+            player takeweapon(currgun);
+            gun = player maps/mp/zombies/_zm_weapons::get_upgrade_weapon( currgun, 0 );
+            player giveweapon(player maps/mp/zombies/_zm_weapons::get_upgrade_weapon( currgun, 0 ), 0, player custom_get_pack_a_punch_weapon_options(gun));
+            player switchToWeapon(gun);
+			playfx(loadfx( "maps/zombie/fx_zombie_packapunch"), ( -7249.01, 3839.83, 4153.46 ), anglestoforward( ( 0, 315, 55  ) ) ); 
+            wait 3;
+        }
+        else
+        {
+            if( player usebuttonpressed() && player.score < cost )
+            {
+                player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "perk_deny", undefined, 0 );
             }
         }
-        wait 0.1;
+    wait 0.1;
     }
-}
-
-perksquickr()
-{
-    level.solo_revives = 0;
-    level.max_solo_revives = 3;
-	while( 1 )
-	{
-        players = get_players();
-		foreach( player in level.players )
-		{
-			if(!player.machine_is_in_use)
-			{
-				if( distance( self.origin, player.origin ) <= 70 ) 
-				{
-                    if(players.size > 1)
-                    {
-						player thread SpawnHint( self.origin, 45, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for Revive [Cost: 1500]" );
-                    }
-                    else
-                    {
-					    player thread SpawnHint( self.origin, 45, 30, "HINT_ACTIVATE", "Hold ^3&&1^7 for Revive [Cost: 500]" );
-                    }
-					if((players.size > 1) && player usebuttonpressed() && !(player hasperk( "specialty_quickrevive" )) && (player.score >= 1500) && !(self.lock) && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand()) 
-					{
-						player.machine_is_in_use = 1;
-						self.lock = 1;
-                        level.solo_revives = 0;
-						player playsound( "zmb_cha_ching" );
-						player.score -= 1500;
-						player playsound ( "mus_perks_revive_sting" );
-						player thread DoGivePerk("specialty_quickrevive");
-						wait 1;
-						weapona = self getcurrentweapon();
-						self switchToWeapon(weapona);
-						wait 3;
-						self.lock = 0;
-						player.machine_is_in_use = 0;
-					}
-                    if(!level.max_revives && (players.size <= 1) && player usebuttonpressed() && !(player hasperk( "specialty_quickrevive" )) && (player.score >= 500) && !(self.lock ) && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand()) 
-					{
-						player.machine_is_in_use = 1;
-						self.lock = 1;
-                        level.solo_revives++;
-						player playsound( "zmb_cha_ching" );
-						player.score -= 500;
-						player playsound ( "mus_perks_revive_sting" );
-						player thread DoGivePerk("specialty_quickrevive");
-						wait 1;
-						weapona = self getcurrentweapon();
-						self switchToWeapon(weapona);
-						wait 3;
-						self.lock = 0;
-						player.machine_is_in_use = 0;
-					}
-                    if(level.max_revives && (players.size <= 1) && player usebuttonpressed() && (player.score >= 500) && !(self.lock) && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand()) 
-					{
-                        player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "oh_shit" );
-                        wait 3;
-                    }
-                    if(level.solo_revives >= level.max_solo_revives)
-                    {
-                        level.max_revives = 1;
-                    }
-					else 
-                    {
-                        if((players.size == 1) && player usebuttonpressed() && player.score < 500)
-					    {
-						    player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "perk_deny", undefined, 0 );
-					    }
-                        if((players.size > 1) && player usebuttonpressed() && player.score < 1500)
-					    {
-						    player maps/mp/zombies/_zm_audio::create_and_play_dialog( "general", "perk_deny", undefined, 0 );
-					    }
-                    }
-				}
-			}
-		}
-		wait 0.1;
-	}
 }
 
 play_fx( fx )
@@ -1635,22 +1945,6 @@ perkboughtcheck()
         self.perk_count += n;
         self drawshader_and_shadermove("none", 0, 0);
     }
-}
-
-drawshader_teleport( shader, x, y, width, height, color, alpha, sort )
-{
-	hud = newclienthudelem( self );
-	hud.elemtype = "icon";
-	hud.color = color;
-	hud.alpha = alpha;
-	hud.sort = sort;
-	hud.children = [];
-	hud.hidewheninmenu = 1;
-	hud setparent( level.uiparent );
-	hud setshader( shader, width, height );
-	hud.x = x;
-	hud.y = y;
-	return hud;
 }
 
 drawshader( shader, x, width, height, color, alpha, sort, foreground )
@@ -1855,7 +2149,7 @@ drawshader_and_shadermove(perk, custom, print)
 			{
 				self iprintln("^9Deadshot");
 				wait 0.2;
-				self iprintln("This Perk increase headshot damage.");
+				self iprintln("This Perk aims automatically enemys head instead of body.");
         	}
 		}
 }
@@ -1913,11 +2207,7 @@ custom_get_player_weapon_limit( player )
     if ( player hascustomperk("MULE") )
     {
         weapon_limit = 3;
-    }
-	if(self.flourish)
-	{
-		weapon_limit += 1;
-	}
+    } 
 	else 
 	{
 		weapons = self getWeaponsListPrimaries();
@@ -1927,56 +2217,6 @@ custom_get_player_weapon_limit( player )
 		}
 	}
     return weapon_limit;
-}
-
-start_er()
-{
-    level endon("end_game");
-    self endon("disconnect");
-    self endon("stopcustomperk");
-    for(;;)
-    {
-        if (self hascustomperk("Ethereal_Razor") && self ismeleeing())
-        {
-            foreach(zombie in getAiArray(level.zombie_team))
-			{
-                if( distance( self.origin, zombie.origin ) <= 100 )
-				{
-					if(self is_insta_kill_active())
-					{
-						zombie doDamage(zombie.maxhealth * 2, (0, 0, 0));
-					}
-					if(level.round_number < 7)
-					{
-						zombie doDamage(zombie.maxhealth * 2, (0, 0, 0));
-					}
-					else
-					{
-						zombie dodamage(zombie.maxhealth / 2, (0, 0, 0));
-					}
-                    if(zombie.health <= 0)
-					{
-                        self maps/mp/zombies/_zm_score::add_to_player_score( 100 );
-						self.kills++;
-					} 
-					else 
-					{
-                        self maps/mp/zombies/_zm_score::add_to_player_score( 10 );
-                    }
-                } 
-            }
-            self.health += 10;
-            if(self.health > self.maxhealth)
-			{
-                self.health = self.maxhealth;
-            }
-            while(self ismeleeing())
-			{
-                wait 0.1;
-            }
-        }
-        wait 0.05;
-    }
 }
 
 dying_wish_checker()
@@ -2166,16 +2406,6 @@ doGivePerk(perk)
     }
 }
 
-SpawnHint( origin, width, height, cursorhint, string )
-{
-    hint = spawn( "trigger_radius", origin, 1, width, height );
-    hint setcursorhint( cursorhint, hint );
-    hint sethintstring( string );
-    hint setvisibletoall();
-    wait 0.2;
-    hint delete();
-}
-
 OnGameEndedHint( player )
 {
 	level waittill("end_game");
@@ -2200,8 +2430,8 @@ playerdamagelastcheck( einflictor, eattacker, idamage, idflags, smeansofdeath, s
 {
     if(self hascustomperk("WIDOWS_WINE"))
 	{
-          if(isDefined( eAttacker.is_zombie ) && eattacker.is_zombie )
-		  {
+		if(isDefined( eAttacker.is_zombie ) && eattacker.is_zombie )
+		{
             grenades = self get_player_lethal_grenade();
             grenade_count = self getweaponammoclip(grenades);
             if(grenade_count > 0)
@@ -2381,7 +2611,7 @@ bus_tele()
 		level.teleporter_in_use = 0;
 	}
     wait 3;
-    thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
+    //thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
     wait 2;
     tele = spawn("trigger_radius", level.automaton.origin, 0, 35, 40);
     tele enablelinkto();
@@ -2413,17 +2643,7 @@ bus_tele()
     }
 }
 
-teleport_effect()
-{
-	self.teleport_effect = drawshader_teleport( "black", 0, -400, 2000, 2000, ( 0, 0, 0 ), 2, 999 );
-	self.teleport_effect.alpha = 2;
-	self.teleport_effect fadeovertime( 3 );
-    wait 2.5;
-	self.teleport_effect.alpha = 0;
-	self.teleport_effect destroy();
-}
-
-spawn_infinite_powerup_drop( v_origin, str_type )
+/*spawn_infinite_powerup_drop( v_origin, str_type )
 {
 	level._powerup_timeout_override = ::infinite;
 	if ( isDefined( str_type ) )
@@ -2438,7 +2658,7 @@ spawn_infinite_powerup_drop( v_origin, str_type )
     wait 60;
     level.safe_powerup delete();
     thread spawn_infinite_powerup_drop( (10350, 8580, 965), level.power_up[ randomintrange( 0, 4 )] );
-}
+}*/
 
 infinite()
 {
@@ -2524,9 +2744,11 @@ safeareabox()
 {
     new_boxes = [];    
     new_boxes[ 5 ][ "name" ]  = "pow_chest";
-    new_boxes[ 5 ][ "origin" ] = ( 10370, 8850, 965 );
-    new_boxes[ 5 ][ "angles" ] = ( 0, 90, 0);
-    
+    new_boxes[ 5 ][ "origin" ] = (-7408.26, 4919.92, 4472.69);
+    new_boxes[ 5 ][ "angles" ] = ( 0, 480, 0);
+    NewModel = spawn( "script_model", (-7385.15, 4929.71, 4462.69));
+	NewModel.angles = (360, 300, 0);
+	NewModel setmodel("collision_clip_64x64x256");
     foreach(new_box in new_boxes) 
 	{    
         for ( i = 0; i < level.chests.size; i++ ) 
@@ -2627,55 +2849,38 @@ init_starting_chest_location( start_chest_name )
 	level.chests[ level.chest_index ] thread [[ level.pandora_show_func ]]();
 }
 
-spawn_points()
-{
-	structs = getstructarray("initial_spawn", "script_noteworthy");
-    for(i=0;i<structs.size;i++)
-    {
-        structs[i].origin = (10130, 8770, 970);
-        structs[i].target = "pf1801_auto2385";
-    }
-	spawnpointstruct = undefined;
-    spawnpointstruct = "initial_spawn_points";
-    spawn = GetstructArray( spawnpointstruct, "targetname" );
-    for(i=0;i<11;i++)
-    {
-        spawn[i].origin = level.safezonespawns[i];
-		spawn[i].angles = (0,0,0);
-    }
-	structs = getstructarray("player_respawn_point", "targetname");
-	for(i=0;i<structs.size;i++)
-    {
-		structs[i].origin = (10130, 8770, 970);
-		structs[i].target = "pf1801_auto2385";
-	}
-	targetforrespawn = getstructarray("pf1801_auto2385", "targetname");
-	for(i=0;i<targetforrespawn.size;i++)
-    {
-		targetforrespawn[i].origin = level.safezonespawns[i];
-	}
-}
-
 wallweaponmonitorbox(origin, angles, weapon, cost, weapon_change )
 {
-	name = get_weapon_display_name( weapon );
-	trigger = spawn("trigger_radius", (9988.26, 8532.03, 980.13), 0, 35, 80);
+	if(weapon == "semtex_bag")
+	{
+		name = "sticky grenade";
+	}
+	else
+	{
+		name = get_weapon_display_name( weapon );	
+	}
+	trigger = spawn("trigger_radius", origin, 0, 35, 80);
 	trigger SetCursorHint("HINT_NOICON");
 	trigger SetHintString("Hold ^3&&1^7 to buy " + name + " [Cost: " + cost + "]");
     for(;;)
     {
 		trigger waittill("trigger", player);
-		if( player usebuttonpressed() && !(player hasWeapon(weapon)) && player.score >= cost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand() && player can_buy_weapon())
+		if( player usebuttonpressed() && !player hasWeapon(weapon) && player.score >= cost && player can_buy())
 		{
-			
-			player playsound( "zmb_cha_ching" );
 			player.score -= cost;
 			if(!isdefined(model))
 			{
 				play_sound_at_pos( "weapon_show", origin, player );
 				model = spawn("script_model", origin);
 				model.angles = angles;
-				model setmodel(getweaponmodel( weapon ));
+				if(weapon == "semtex_bag")
+				{
+					model setmodel( weapon );
+				}
+				else
+				{
+					model setmodel(getweaponmodel( weapon ));
+				}
 			}
 			if(isdefined(weapon_change))
 			{
@@ -2683,7 +2888,14 @@ wallweaponmonitorbox(origin, angles, weapon, cost, weapon_change )
 			}
 			else
 			{
-				player thread weapon_give( weapon, 0, 1 );
+				if(weapon == "semtex_bag")
+				{
+					player thread weapon_give( "sticky_grenade_zm", 0, 1 );
+				}
+				else
+				{
+					player thread weapon_give( weapon, 0, 1 );
+				}
 			}
 			wait 1;
 		}
@@ -2702,11 +2914,11 @@ weapon_change(weapon, flourish)
 {
 	self.flourish = 1;
 	weap = self getcurrentweapon();
-	self thread weapon_give(flourish, 0, 1);
+	self thread weapon_give( flourish, 0, 1 );
 	self waittill("weapon_change_complete");
 	self takeweapon(flourish);
 	self switchtoweapon(weap);
-	self thread weapon_give( weapon, 0, 1 );
+	self giveweapon( weapon );
 	self.flourish = 0;
 }
 
@@ -2721,13 +2933,17 @@ playchalkfx(effect, origin, angles)
 	}
 }
 
-can_buy_weapon()
+can_buy()
 {
 	if ( isDefined( self.is_drinking ) && self.is_drinking > 0 )
 	{
 		return 0;
 	}
 	if ( self IsSwitchingWeapons() )
+	{
+		return 0;
+	}
+	if ( self maps/mp/zombies/_zm_laststand::player_is_in_laststand() )
 	{
 		return 0;
 	}
@@ -2799,6 +3015,18 @@ actor_damage_override( inflictor, attacker, damage, flags, meansofdeath, weapon,
 	if ( isDefined( attacker ) && isPlayer( attacker ) && attacker HasCustomPerk("deadshot") && is_headshot( weapon, shitloc, meansofdeath ) )
 	{
 		final_damage *= 2;
+	}
+	if (attacker hascustomperk("Ethereal_Razor") && isplayer( attacker ) && isDefined( weapon ) && weapon == "knife_zm" || isDefined( weapon ) && weapon == "bowie_knife_zm" || isDefined( weapon ) && weapon == "tazer_knuckles_zm" )
+    {
+		if(level.round_number < 7)
+		{
+			final_damage = self.maxhealth * 2;
+		}
+		else
+		{
+			final_damage *= (level.round_number / 5);
+		}
+		attacker.health += 10;
 	}
 	return int( final_damage );
 }
