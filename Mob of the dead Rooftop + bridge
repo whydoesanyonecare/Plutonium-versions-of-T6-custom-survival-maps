@@ -2326,7 +2326,7 @@ shield_bench(origin, angles)
 			{
                 player playsound("zmb_cha_ching");
                 player.score -= 1500;
-				player maps/mp/zombies/_zm_equipment::equipment_give("alcatraz_shield_zm");
+				player maps/mp/zombies/_zm_equipment::equipment_buy("alcatraz_shield_zm");
 		    }
         }
 		wait .1;
