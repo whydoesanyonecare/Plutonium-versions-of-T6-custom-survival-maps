@@ -2530,10 +2530,22 @@ tomahawk_challenge()
 	level.challenge_started = 0;
 	fx delete();
 	playfx(loadfx( "maps/zombie_alcatraz/fx_alcatraz_tomahawk_pickup"), (-2000, -3545, -8357), anglestoforward( ( 0, 0, 0 ) ) ); 
-	trigger SetHintString("Hold ^3&&1^7 for Tomahawk");
+	
 	for(;;)
 	{
-		trigger waittill("trigger", player);
+        trigger waittill("trigger", player);
+        if(!player hasweapon("bouncing_tomahawk_zm") && !player hasweapon("upgraded_tomahawk_zm"))
+        {
+            trigger SetHintString("Hold ^3&&1^7 for Tomahawk");
+        }
+		else if(player hasweapon("bouncing_tomahawk_zm"))
+        {
+            trigger SetHintString("Hold ^3&&1^7 for Upgraded Tomahawk [Cost: 15000]");
+        }
+        else
+        {
+            trigger SetHintString("You already have Upgraded Tomahawk!");
+        }
 		if(player UseButtonPressed())
 		{
 			trigger SetHintString(" ");
@@ -2542,13 +2554,13 @@ tomahawk_challenge()
 			    player giveweapon("bouncing_tomahawk_zm");
 				wait 2;
 			}
-			else
+			else if(player hasweapon("bouncing_tomahawk_zm") && player.score >= 15000)
 			{
-				trigger SetHintString("You already have Tomahawk!");
+                player.score -= 15000;
+                player giveweapon("upgraded_tomahawk_zm");
 				wait 2;
 			}
 		}
-		trigger SetHintString("Hold ^3&&1^7 for Tomahawk");
 		wait .1;
 	}
 }
