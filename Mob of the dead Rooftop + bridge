@@ -2557,7 +2557,10 @@ tomahawk_challenge()
 			else if(player hasweapon("bouncing_tomahawk_zm") && player.score >= 15000)
 			{
                 player.score -= 15000;
-                player giveweapon("upgraded_tomahawk_zm");
+                player setclientfieldtoplayer( "upgraded_tomahawk_in_use", 1 );
+                player giveweapon( "upgraded_tomahawk_zm" );
+                player givemaxammo( "upgraded_tomahawk_zm" );
+                player set_player_tactical_grenade( "upgraded_tomahawk_zm" );
 				wait 2;
 			}
 		}
