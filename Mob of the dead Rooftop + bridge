@@ -2413,7 +2413,7 @@ shield_challenge()
 		headshots = 50 - level.challenge_headshots;
 		level.headshot.label = &"Headshots Left: ^1";
         level.headshot setValue( headshots );
-		if(level.challenge_headshots == 50)
+		if(level.challenge_headshots >= 50)
 		{
 			iprintln("Shield Challenge Completed!");
 			level notify("shield_challenge_completed");
